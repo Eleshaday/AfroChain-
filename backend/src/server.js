@@ -1,10 +1,31 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const { deployEscrowContract } = require('./deployContract');
 const { releaseToFarmer, refundBuyer } = require('./contractActions');
+const { initializeDatabase } = require('./database');
+const authRoutes = require('./authRoutes');
+const cartRoutes = require('./cartRoutes');
 
 const app = express();
+
+// Middleware
+app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
+
+// Initialize database
+initializeDatabase()
+    .then(() => {
+        console.log('Database initialized successfully');
+    })
+    .catch((error) => {
+        console.error('Database initialization failed:', error);
+    });
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
 
 app.post('/api/deploy', async (req, res) => {
     const { farmerAddress, arbiterAddress, amount } = req.body;
