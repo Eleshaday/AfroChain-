@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function HomePage({ products, onAddToCart }) {
+export default function HomePage({ products, onAddToCart, onVerifyProduct }) {
     const featuredProducts = products.slice(0, 3); // Show first 3 products as featured
 
     return (
@@ -70,17 +70,40 @@ export default function HomePage({ products, onAddToCart }) {
                                     </span>
                                 </div>
                                 
-                                <button 
-                                    onClick={() => onAddToCart(product)}
-                                    disabled={!product.available}
-                                    className="add-to-cart-btn"
-                                    style={{
-                                        background: product.available ? 'var(--gradient-primary)' : '#6c757d',
-                                        cursor: product.available ? 'pointer' : 'not-allowed'
-                                    }}
-                                >
-                                    {product.available ? '🛒 Add to Cart' : 'Out of Stock'}
-                                </button>
+                                <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                    <button 
+                                        onClick={() => onAddToCart(product)}
+                                        disabled={!product.available}
+                                        className="add-to-cart-btn"
+                                        style={{
+                                            background: product.available ? 'var(--gradient-primary)' : '#6c757d',
+                                            cursor: product.available ? 'pointer' : 'not-allowed',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {product.available ? '🛒 Add to Cart' : 'Out of Stock'}
+                                    </button>
+                                    
+                                    {product.authenticityVerified && (
+                                        <button 
+                                            onClick={() => onVerifyProduct && onVerifyProduct(product.batchId)}
+                                            className="add-to-cart-btn"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #17a2b8, #138496)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '0.75rem',
+                                                borderRadius: 'var(--border-radius)',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9rem',
+                                                fontWeight: '600',
+                                                width: '100%'
+                                            }}
+                                        >
+                                            🔍 Verify Authenticity
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

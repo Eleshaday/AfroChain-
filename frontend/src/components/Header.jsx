@@ -1,12 +1,16 @@
 import React from 'react';
 
-export default function Header({ currentPage, setCurrentPage, cartCount, cartNotification, onLogout, onLogin }) {
+export default function Header({ currentPage, setCurrentPage, cartCount, cartNotification, onLogout, onLogin, setSelectedBatchId, setVerificationResult }) {
     return (
         <header className="header">
             <div className="header-content">
-                <a href="#" className="logo" onClick={(e) => { e.preventDefault(); setCurrentPage('home'); }}>
-                    ☕ CoffeeDirect
-                </a>
+                <div className="logo-section">
+                    <a href="#" className="logo" onClick={(e) => { e.preventDefault(); setCurrentPage('home'); }}>
+                        CoffeeDirect
+                    </a>
+                    <span className="tagline">Ethiopian Coffee Marketplace</span>
+                </div>
+                
                 <nav className="nav">
                     <a 
                         href="#" 
@@ -24,60 +28,53 @@ export default function Header({ currentPage, setCurrentPage, cartCount, cartNot
                     </a>
                     <a 
                         href="#" 
+                        className={`nav-link ${currentPage === 'verify' ? 'active' : ''}`}
+                        onClick={(e) => { 
+                            e.preventDefault(); 
+                            setSelectedBatchId(null);
+                            setVerificationResult(null);
+                            setCurrentPage('verify'); 
+                        }}
+                    >
+                        Verify
+                    </a>
+                    <a 
+                        href="#" 
+                        className={`nav-link ${currentPage === 'escrow' ? 'active' : ''}`}
+                        onClick={(e) => { 
+                            e.preventDefault(); 
+                            setCurrentPage('escrow'); 
+                        }}
+                    >
+                        Escrow
+                    </a>
+                    <a 
+                        href="#" 
                         className={`nav-link ${currentPage === 'transactions' ? 'active' : ''}`}
                         onClick={(e) => { e.preventDefault(); setCurrentPage('transactions'); }}
                     >
-                        📋 Transactions
+                        Transactions
                     </a>
                     <a 
                         href="#" 
                         className={`nav-link cart-link ${currentPage === 'cart' ? 'active' : ''}`}
                         onClick={(e) => { e.preventDefault(); setCurrentPage('cart'); }}
-                        style={{ position: 'relative' }}
                     >
-                        🛒 Cart
+                        Cart
                         {cartCount > 0 && (
                             <span className="cart-badge">
                                 {cartCount}
                             </span>
                         )}
-                        {cartNotification > 0 && (
-                            <span className="cart-notification">
-                                {cartNotification}
-                            </span>
-                        )}
                     </a>
                 </nav>
                 
-                {/* Logout/Login Simulation */}
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button 
-                        onClick={onLogout}
-                        style={{
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem'
-                        }}
-                    >
-                        🚪 Logout
+                <div className="auth-section">
+                    <button className="auth-btn logout-btn" onClick={onLogout}>
+                        Logout
                     </button>
-                    <button 
-                        onClick={onLogin}
-                        style={{
-                            background: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem'
-                        }}
-                    >
-                        🔑 Login
+                    <button className="auth-btn login-btn" onClick={onLogin}>
+                        Login
                     </button>
                 </div>
             </div>

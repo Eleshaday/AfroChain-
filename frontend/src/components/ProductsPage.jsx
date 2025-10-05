@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function ProductsPage({ products, onAddToCart }) {
+export default function ProductsPage({ products, onAddToCart, onVerifyProduct }) {
     const [filteredProducts, setFilteredProducts] = useState(products);
     const [filters, setFilters] = useState({
         origin: '',
@@ -170,12 +170,35 @@ export default function ProductsPage({ products, onAddToCart }) {
                                     </span>
                                 </div>
                                 
-                                <button 
-                                    onClick={() => onAddToCart(product)}
-                                    className="add-to-cart-btn"
-                                >
-                                    🛒 Add to Cart
-                                </button>
+                                <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                    <button 
+                                        onClick={() => onAddToCart(product)}
+                                        className="add-to-cart-btn"
+                                        style={{ width: '100%' }}
+                                    >
+                                        🛒 Add to Cart
+                                    </button>
+                                    
+                                    {product.authenticityVerified && (
+                                        <button 
+                                            onClick={() => onVerifyProduct && onVerifyProduct(product.batchId)}
+                                            className="add-to-cart-btn"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #17a2b8, #138496)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '0.75rem',
+                                                borderRadius: 'var(--border-radius)',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9rem',
+                                                fontWeight: '600',
+                                                width: '100%'
+                                            }}
+                                        >
+                                            🔍 Verify Authenticity
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))

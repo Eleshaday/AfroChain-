@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import TokenPayment from './TokenPayment';
 
 export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPaymentSuccess }) {
+    const [paymentInterface, setPaymentInterface] = useState('enhanced'); // 'enhanced' or 'legacy'
     const [paymentMethod, setPaymentMethod] = useState('blockchain');
     const [walletAddress, setWalletAddress] = useState('');
     const [privateKey, setPrivateKey] = useState('');
@@ -106,9 +108,68 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
 
     return (
         <div className="checkout-page">
-            <h1 className="section-title">
-                Checkout
-            </h1>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '2rem'
+            }}>
+                <h1 className="section-title">
+                    Checkout
+                </h1>
+                <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    background: 'var(--background-color)',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--border-radius)',
+                    border: '1px solid var(--border-color)'
+                }}>
+                    <button
+                        onClick={() => setPaymentInterface('enhanced')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            border: 'none',
+                            borderRadius: 'var(--border-radius)',
+                            background: paymentInterface === 'enhanced' ? 'var(--primary-color)' : 'transparent',
+                            color: paymentInterface === 'enhanced' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            transition: 'var(--transition)'
+                        }}
+                    >
+                        🚀 Enhanced
+                    </button>
+                    <button
+                        onClick={() => setPaymentInterface('legacy')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            border: 'none',
+                            borderRadius: 'var(--border-radius)',
+                            background: paymentInterface === 'legacy' ? 'var(--primary-color)' : 'transparent',
+                            color: paymentInterface === 'legacy' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            transition: 'var(--transition)'
+                        }}
+                    >
+                        🔗 Legacy
+                    </button>
+                </div>
+            </div>
+
+            {paymentInterface === 'enhanced' ? (
+                <TokenPayment
+                    cart={cart}
+                    totalPrice={totalPrice}
+                    onPaymentSuccess={onPaymentSuccess}
+                    onBack={onBackToCart}
+                />
+            ) : (
+                <div>
+                    {/* Legacy Payment Interface */}
 
             {/* Order Summary */}
             <div className="cart-total">
@@ -282,6 +343,8 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
                     <li>Support for multiple cryptocurrencies (ETH, HBAR, etc.)</li>
                 </ul>
             </div>
+            </div>
+            )}
         </div>
     );
 }

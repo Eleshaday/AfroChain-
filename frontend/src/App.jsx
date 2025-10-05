@@ -5,6 +5,11 @@ import ProductsPage from './components/ProductsPage';
 import CartPage from './components/CartPage';
 import CheckoutPage from './components/CheckoutPage';
 import TransactionHistory from './components/TransactionHistory';
+import AuthenticityVerifier from './components/AuthenticityVerifier';
+import SmartEscrow from './components/SmartEscrow';
+import LoyaltySystem from './components/LoyaltySystem';
+import FarmerReputation from './components/FarmerReputation';
+import SustainabilityTracker from './components/SustainabilityTracker';
 import './App.css';
 
 export default function App() {
@@ -15,6 +20,9 @@ export default function App() {
         return savedCart ? JSON.parse(savedCart) : [];
     });
     const [cartNotification, setCartNotification] = useState(0);
+    const [selectedBatchId, setSelectedBatchId] = useState(null);
+    const [verificationResult, setVerificationResult] = useState(null);
+    const [selectedCoffeeProduct, setSelectedCoffeeProduct] = useState(null);
     const [coffeeProducts, setCoffeeProducts] = useState([
         {
             id: 1,
@@ -27,7 +35,18 @@ export default function App() {
             price: "$18.50/lb",
             image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
             available: 100,
-            certification: "Fair Trade Certified"
+            certification: "Fair Trade Certified",
+            farmId: "SIDAMA-001",
+            harvestDate: "2024-01-15",
+            batchId: "BATCH-SIDAMA-2024-001",
+            nftId: "NFT-SIDAMA-001",
+            authenticityVerified: true,
+            supplyChainSteps: [
+                { step: "Farm Harvest", timestamp: "2024-01-15T06:00:00Z", location: "Sidama Region, Ethiopia" },
+                { step: "Processing", timestamp: "2024-01-16T08:00:00Z", location: "Sidama Processing Plant" },
+                { step: "Quality Control", timestamp: "2024-01-17T10:00:00Z", location: "Ethiopian Coffee Authority" },
+                { step: "Export Preparation", timestamp: "2024-01-18T12:00:00Z", location: "Addis Ababa Port" }
+            ]
         },
         {
             id: 2,
@@ -40,7 +59,18 @@ export default function App() {
             price: "$16.75/lb",
             image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
             available: 75,
-            certification: "Organic Certified"
+            certification: "Organic Certified",
+            farmId: "YIRGACHEFFE-002",
+            harvestDate: "2024-02-10",
+            batchId: "BATCH-YIRGA-2024-002",
+            nftId: "NFT-YIRGA-002",
+            authenticityVerified: true,
+            supplyChainSteps: [
+                { step: "Farm Harvest", timestamp: "2024-02-10T06:30:00Z", location: "Yirgacheffe, Ethiopia" },
+                { step: "Wet Processing", timestamp: "2024-02-11T07:00:00Z", location: "Yirgacheffe Processing Center" },
+                { step: "Drying", timestamp: "2024-02-12T08:00:00Z", location: "Yirgacheffe Drying Beds" },
+                { step: "Quality Control", timestamp: "2024-02-13T09:00:00Z", location: "Ethiopian Coffee Authority" }
+            ]
         },
         {
             id: 3,
@@ -53,7 +83,18 @@ export default function App() {
             price: "$14.25/lb",
             image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
             available: 60,
-            certification: "Direct Trade"
+            certification: "Direct Trade",
+            farmId: "HARRAR-003",
+            harvestDate: "2024-01-25",
+            batchId: "BATCH-HARRAR-2024-003",
+            nftId: "NFT-HARRAR-003",
+            authenticityVerified: true,
+            supplyChainSteps: [
+                { step: "Farm Harvest", timestamp: "2024-01-25T05:00:00Z", location: "Harrar Region, Ethiopia" },
+                { step: "Natural Processing", timestamp: "2024-01-26T06:00:00Z", location: "Harrar Processing Facility" },
+                { step: "Sun Drying", timestamp: "2024-01-27T07:00:00Z", location: "Harrar Drying Patios" },
+                { step: "Quality Control", timestamp: "2024-01-28T08:00:00Z", location: "Ethiopian Coffee Authority" }
+            ]
         },
         {
             id: 4,
@@ -66,7 +107,18 @@ export default function App() {
             price: "$20.00/lb",
             image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
             available: 40,
-            certification: "Rainforest Alliance"
+            certification: "Rainforest Alliance",
+            farmId: "GUJI-004",
+            harvestDate: "2024-02-20",
+            batchId: "BATCH-GUJI-2024-004",
+            nftId: "NFT-GUJI-004",
+            authenticityVerified: true,
+            supplyChainSteps: [
+                { step: "Farm Harvest", timestamp: "2024-02-20T05:30:00Z", location: "Guji Zone, Ethiopia" },
+                { step: "Natural Processing", timestamp: "2024-02-21T06:30:00Z", location: "Guji Processing Center" },
+                { step: "Extended Fermentation", timestamp: "2024-02-22T07:30:00Z", location: "Guji Fermentation Tanks" },
+                { step: "Quality Control", timestamp: "2024-02-23T08:30:00Z", location: "Ethiopian Coffee Authority" }
+            ]
         }
     ]);
 
@@ -158,6 +210,50 @@ export default function App() {
         alert('Logged in! Your saved cart has been restored.');
     };
 
+    const handleVerifyAuthenticity = async (batchId) => {
+        try {
+            const result = await fetch(`http://localhost:4000/api/verify/${batchId}`)
+                .then(res => res.json());
+            setVerificationResult(result);
+        } catch (error) {
+            console.warn('Backend not available, using mock verification:', error);
+            // Fallback to mock verification data
+            const mockResult = {
+                success: true,
+                valid: true,
+                batchId: batchId,
+                nftId: 'NFT-SIDAMA-001',
+                verification: {
+                    status: 'AUTHENTIC',
+                    confidence: 95,
+                    checks: [
+                        { name: 'Blockchain Hash', status: 'VALID' },
+                        { name: 'NFT Certificate', status: 'VERIFIED' },
+                        { name: 'Supply Chain', status: 'TRACEABLE' },
+                        { name: 'Origin Verification', status: 'CONFIRMED' }
+                    ]
+                },
+                coffeeData: {
+                    farmName: 'Sidama Coffee Farmers Cooperative',
+                    origin: 'Sidama Region, Ethiopia',
+                    farmerName: 'Alemayehu Bekele',
+                    harvestDate: '2024-01-15',
+                    qualityGrade: 'Grade 1',
+                    processingMethod: 'Washed',
+                    elevation: '1800-2000m',
+                    certification: 'Organic Certified'
+                },
+                verificationHash: 'mock-verification-hash-12345',
+                confidenceScore: 95,
+                antiFraudStatus: 'CLEAR',
+                transactionHash: 'mock-tx-hash-67890',
+                timestamp: new Date().toISOString(),
+                network: 'Hedera (Mock)'
+            };
+            setVerificationResult(mockResult);
+        }
+    };
+
     return (
         <div className="app">
             <Header 
@@ -167,10 +263,32 @@ export default function App() {
                 cartNotification={cartNotification}
                 onLogout={simulateLogout}
                 onLogin={simulateLogin}
+                setSelectedBatchId={setSelectedBatchId}
+                setVerificationResult={setVerificationResult}
             />
             <main>
-                {currentPage === 'home' && <HomePage products={coffeeProducts} onAddToCart={addToCart} />}
-                {currentPage === 'products' && <ProductsPage products={coffeeProducts} onAddToCart={addToCart} />}
+                {currentPage === 'home' && <HomePage 
+                    products={coffeeProducts} 
+                    onAddToCart={addToCart}
+                    onVerifyProduct={(batchId) => {
+                        const product = coffeeProducts.find(p => p.batchId === batchId);
+                        setSelectedBatchId(batchId);
+                        setSelectedCoffeeProduct(product);
+                        setVerificationResult(null);
+                        setCurrentPage('verify');
+                    }}
+                />}
+                {currentPage === 'products' && <ProductsPage 
+                    products={coffeeProducts} 
+                    onAddToCart={addToCart}
+                    onVerifyProduct={(batchId) => {
+                        const product = coffeeProducts.find(p => p.batchId === batchId);
+                        setSelectedBatchId(batchId);
+                        setSelectedCoffeeProduct(product);
+                        setVerificationResult(null);
+                        setCurrentPage('verify');
+                    }}
+                />}
                 {currentPage === 'cart' && <CartPage 
                     cart={cart} 
                     onRemoveFromCart={removeFromCart}
@@ -188,6 +306,16 @@ export default function App() {
                     }}
                 />}
                 {currentPage === 'transactions' && <TransactionHistory />}
+                {currentPage === 'verify' && <AuthenticityVerifier 
+                    batchId={selectedBatchId}
+                    onVerify={handleVerifyAuthenticity}
+                    verificationResult={verificationResult}
+                    coffeeProduct={selectedCoffeeProduct}
+                />}
+                {currentPage === 'escrow' && <SmartEscrow onBack={() => setCurrentPage('home')} />}
+                {currentPage === 'loyalty' && <LoyaltySystem onBack={() => setCurrentPage('home')} />}
+                {currentPage === 'farmers' && <FarmerReputation onBack={() => setCurrentPage('home')} />}
+                {currentPage === 'sustainability' && <SustainabilityTracker onBack={() => setCurrentPage('home')} />}
             </main>
         </div>
     );
