@@ -471,17 +471,15 @@ class BlockchainService {
 
     async getSupplyChainHistory(batchId) {
         try {
-            const topicId = this.supplyChainTopics.get(batchId);
-            if (!topicId) {
-                return {
-                    success: false,
-                    error: 'No supply chain topic found for this batch'
-                };
-            }
-
+            // In mock mode, return mock data even if a topic hasn't been created yet
             if (!this.hederaClient) {
                 // Mock mode - return sample supply chain data
                 console.log('🔧 Mock supply chain history retrieval...');
+                // Ensure there's a mock topic associated for consistency across calls
+                if (!this.supplyChainTopics.get(batchId)) {
+                    const mockTopicId = `0.0.${Math.floor(Math.random() * 1000000)}`;
+                    this.supplyChainTopics.set(batchId, mockTopicId);
+                }
                 
                 const mockSteps = [
                     {
@@ -523,6 +521,14 @@ class BlockchainService {
                     batchId: batchId,
                     steps: mockSteps,
                     network: 'Hedera (Mock)'
+                };
+            }
+
+            const topicId = this.supplyChainTopics.get(batchId);
+            if (!topicId) {
+                return {
+                    success: false,
+                    error: 'No supply chain topic found for this batch'
                 };
             }
 

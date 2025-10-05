@@ -92,6 +92,28 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
                     console.error('Loyalty reward error:', error);
                 }
 
+                // Persist transaction history in localStorage
+                try {
+                    const transactionRecord = {
+                        id: Date.now(),
+                        hash: data.transactionHash || data.transactionId || `mock-tx-${Date.now()}`,
+                        amount: totalPrice,
+                        network: data.network || (paymentMethod === 'ethereum' ? 'Ethereum (Mock)' : paymentMethod === 'hedera' ? 'Hedera (Mock)' : 'Hedera (Mock)'),
+                        items: cart.map(item => ({
+                            name: item.coffeeName,
+                            quantity: item.quantity,
+                            price: parseFloat(item.price.replace('$', ''))
+                        })),
+                        timestamp: new Date().toISOString(),
+                        status: 'completed'
+                    };
+                    const existing = JSON.parse(localStorage.getItem('transactionHistory') || '[]');
+                    existing.unshift(transactionRecord);
+                    localStorage.setItem('transactionHistory', JSON.stringify(existing));
+                } catch (e) {
+                    console.warn('Failed to store transaction history:', e);
+                }
+
                 // Call success callback after a delay
                 setTimeout(() => {
                     onPaymentSuccess();

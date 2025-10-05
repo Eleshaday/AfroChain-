@@ -11,9 +11,15 @@ import LoyaltySystem from './components/LoyaltySystem';
 import FarmerReputation from './components/FarmerReputation';
 import SustainabilityTracker from './components/SustainabilityTracker';
 import './App.css';
+import Login from './components/Login';
 
 export default function App() {
     const [currentPage, setCurrentPage] = useState('home');
+    const [user, setUser] = useState(() => {
+        const saved = localStorage.getItem('authUser');
+        return saved ? JSON.parse(saved) : null;
+    });
+    const [pendingRedirect, setPendingRedirect] = useState(null);
     const [cart, setCart] = useState(() => {
         // Load cart from localStorage on component mount
         const savedCart = localStorage.getItem('coffeeCart');
@@ -201,13 +207,27 @@ export default function App() {
 
     // Simulate logout/login functionality
     const simulateLogout = () => {
-        // Cart persists even after "logout" because it's stored in localStorage
+        setUser(null);
+        localStorage.removeItem('authUser');
         alert('Logged out! Your cart is still saved in your browser.');
     };
 
     const simulateLogin = () => {
-        // Cart is automatically loaded from localStorage on "login"
-        alert('Logged in! Your saved cart has been restored.');
+        setCurrentPage('login');
+    };
+
+    const handleLogin = (userObj, { redirectTo, redirectState } = {}) => {
+        setUser(userObj);
+        localStorage.setItem('authUser', JSON.stringify(userObj));
+        const target = redirectTo || pendingRedirect?.redirectTo || 'home';
+        const state = redirectState || pendingRedirect?.redirectState || null;
+        setPendingRedirect(null);
+        if (target === 'verify' && state?.batchId) {
+            setSelectedBatchId(state.batchId);
+            const product = coffeeProducts.find(p => p.batchId === state.batchId);
+            setSelectedCoffeeProduct(product || null);
+        }
+        setCurrentPage(target);
     };
 
     const handleVerifyAuthenticity = async (batchId) => {
@@ -265,12 +285,18 @@ export default function App() {
                 onLogin={simulateLogin}
                 setSelectedBatchId={setSelectedBatchId}
                 setVerificationResult={setVerificationResult}
+                user={user}
             />
             <main>
                 {currentPage === 'home' && <HomePage 
                     products={coffeeProducts} 
                     onAddToCart={addToCart}
                     onVerifyProduct={(batchId) => {
+                        if (!user) {
+                            setPendingRedirect({ redirectTo: 'verify', redirectState: { batchId } });
+                            setCurrentPage('login');
+                            return;
+                        }
                         const product = coffeeProducts.find(p => p.batchId === batchId);
                         setSelectedBatchId(batchId);
                         setSelectedCoffeeProduct(product);
@@ -282,6 +308,11 @@ export default function App() {
                     products={coffeeProducts} 
                     onAddToCart={addToCart}
                     onVerifyProduct={(batchId) => {
+                        if (!user) {
+                            setPendingRedirect({ redirectTo: 'verify', redirectState: { batchId } });
+                            setCurrentPage('login');
+                            return;
+                        }
                         const product = coffeeProducts.find(p => p.batchId === batchId);
                         setSelectedBatchId(batchId);
                         setSelectedCoffeeProduct(product);
@@ -289,6 +320,13 @@ export default function App() {
                         setCurrentPage('verify');
                     }}
                 />}
+                {currentPage === 'login' && (
+                    <Login 
+                        onLogin={handleLogin}
+                        redirectTo={pendingRedirect?.redirectTo}
+                        redirectState={pendingRedirect?.redirectState}
+                    />
+                )}
                 {currentPage === 'cart' && <CartPage 
                     cart={cart} 
                     onRemoveFromCart={removeFromCart}

@@ -259,8 +259,7 @@ export default function AuthenticityVerifier({ batchId, onVerify, verificationRe
                     padding: '2rem',
                     color: 'var(--text-secondary)'
                 }}>
-                    <p>No batch ID provided for verification.</p>
-                    <p>Scan a QR code or enter a batch ID to verify coffee authenticity.</p>
+                    <p>Scan a QR code or choose a product to verify authenticity.</p>
                 </div>
             )}
 

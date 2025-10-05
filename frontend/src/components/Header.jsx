@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Header({ currentPage, setCurrentPage, cartCount, cartNotification, onLogout, onLogin, setSelectedBatchId, setVerificationResult }) {
+export default function Header({ currentPage, setCurrentPage, cartCount, cartNotification, onLogout, onLogin, setSelectedBatchId, setVerificationResult, user }) {
     return (
         <header className="header">
             <div className="header-content">
@@ -70,12 +70,18 @@ export default function Header({ currentPage, setCurrentPage, cartCount, cartNot
                 </nav>
                 
                 <div className="auth-section">
-                    <button className="auth-btn logout-btn" onClick={onLogout}>
-                        Logout
-                    </button>
-                    <button className="auth-btn login-btn" onClick={onLogin}>
-                        Login
-                    </button>
+                    {user ? (
+                        <>
+                            <span style={{ marginRight: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{user.email}</span>
+                            <button className="auth-btn logout-btn" onClick={onLogout}>
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <button className="auth-btn login-btn" onClick={onLogin}>
+                            Login
+                        </button>
+                    )}
                 </div>
             </div>
         </header>
