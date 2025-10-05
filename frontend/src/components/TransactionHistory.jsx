@@ -9,6 +9,14 @@ export default function TransactionHistory() {
         // Load transactions from localStorage
         const savedTransactions = JSON.parse(localStorage.getItem('transactionHistory') || '[]');
         setTransactions(savedTransactions);
+        
+        // Check if we just completed a transaction (redirected from checkout)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            setShowSuccessMessage(true);
+            // Hide success message after 5 seconds
+            setTimeout(() => setShowSuccessMessage(false), 5000);
+        }
     }, []);
 
     const filteredTransactions = transactions.filter(transaction => {
@@ -81,9 +89,24 @@ export default function TransactionHistory() {
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#2c1810' }}>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#2c1810' }}>
                 Transaction History
             </h1>
+            
+            {showSuccessMessage && (
+                <div style={{
+                    background: '#d4edda',
+                    color: '#155724',
+                    padding: '1rem',
+                    borderRadius: '5px',
+                    marginBottom: '2rem',
+                    border: '1px solid #c3e6cb',
+                    textAlign: 'center'
+                }}>
+                    <h3 style={{ margin: '0 0 0.5rem 0' }}>🎉 Payment Successful!</h3>
+                    <p style={{ margin: '0' }}>Your transaction has been completed and saved to your history.</p>
+                </div>
+            )}
             
             <p style={{ 
                 textAlign: 'center', 

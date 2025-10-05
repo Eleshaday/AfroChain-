@@ -3,44 +3,40 @@ import React from 'react';
 export default function CartPage({ cart, onRemoveFromCart, onUpdateQuantity, onProceedToBuy, totalPrice }) {
     if (cart.length === 0) {
         return (
-            <div style={{ 
-                padding: '4rem 2rem', 
-                textAlign: 'center',
-                maxWidth: '800px',
-                margin: '0 auto'
-            }}>
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#2c1810' }}>
+            <div className="cart-page">
+                <h1 className="section-title">
                     Your Cart is Empty
                 </h1>
-                <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '2rem' }}>
-                    Discover our premium Ethiopian coffee beans and add them to your cart!
-                </p>
-                <button 
-                    onClick={() => window.location.href = '/products'}
-                    style={{
-                        background: '#8B4513',
-                        color: 'white',
-                        padding: '1rem 2rem',
-                        border: 'none',
-                        borderRadius: '5px',
-                        fontSize: '1.1rem',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Browse Products
-                </button>
+                <div style={{
+                    background: 'var(--card-background)',
+                    padding: '3rem',
+                    borderRadius: 'var(--border-radius)',
+                    boxShadow: 'var(--shadow-light)',
+                    border: '1px solid var(--border-color)',
+                    textAlign: 'center'
+                }}>
+                    <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+                        Discover our premium Ethiopian coffee beans and add them to your cart!
+                    </p>
+                    <button 
+                        onClick={() => window.location.href = '/products'}
+                        className="add-to-cart-btn"
+                    >
+                        🛍️ Browse Products
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#2c1810' }}>
+        <div className="cart-page">
+            <h1 className="section-title">
                 Shopping Cart
             </h1>
             <p style={{ 
                 textAlign: 'center', 
-                color: '#28a745', 
+                color: 'var(--success-color)', 
                 marginBottom: '2rem',
                 fontSize: '0.9rem'
             }}>
@@ -48,17 +44,12 @@ export default function CartPage({ cart, onRemoveFromCart, onUpdateQuantity, onP
             </p>
 
             <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
-                {cart.map(item => (
-                    <div key={item.id} style={{
-                        background: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '10px',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                        display: 'grid',
-                        gridTemplateColumns: '100px 1fr auto auto',
-                        gap: '1rem',
-                        alignItems: 'center'
-                    }}>
+                {cart.map((item, index) => (
+                    <div 
+                        key={item.id} 
+                        className="cart-item"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                    >
                         <img 
                             src={item.image} 
                             alt={item.coffeeName}
@@ -145,14 +136,8 @@ export default function CartPage({ cart, onRemoveFromCart, onUpdateQuantity, onP
             </div>
 
             {/* Order Summary */}
-            <div style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                marginBottom: '2rem'
-            }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#2c1810' }}>
+            <div className="cart-total">
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
                     Order Summary
                 </h2>
                 
@@ -178,20 +163,9 @@ export default function CartPage({ cart, onRemoveFromCart, onUpdateQuantity, onP
             <div style={{ textAlign: 'center' }}>
                 <button 
                     onClick={onProceedToBuy}
-                    style={{
-                        background: '#8B4513',
-                        color: 'white',
-                        padding: '1rem 3rem',
-                        border: 'none',
-                        borderRadius: '5px',
-                        fontSize: '1.2rem',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.3s'
-                    }}
-                    onMouseOver={(e) => e.target.style.background = '#A0522D'}
-                    onMouseOut={(e) => e.target.style.background = '#8B4513'}
+                    className="proceed-btn"
                 >
-                    Proceed to Buy
+                    💳 Proceed to Buy
                 </button>
             </div>
         </div>

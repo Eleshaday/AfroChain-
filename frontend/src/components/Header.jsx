@@ -24,13 +24,6 @@ export default function Header({ currentPage, setCurrentPage, cartCount, cartNot
                     </a>
                     <a 
                         href="#" 
-                        className={`nav-link ${currentPage === 'farmer-post' ? 'active' : ''}`}
-                        onClick={(e) => { e.preventDefault(); setCurrentPage('farmer-post'); }}
-                    >
-                        Sell Coffee
-                    </a>
-                    <a 
-                        href="#" 
                         className={`nav-link ${currentPage === 'transactions' ? 'active' : ''}`}
                         onClick={(e) => { e.preventDefault(); setCurrentPage('transactions'); }}
                     >

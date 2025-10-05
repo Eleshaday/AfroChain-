@@ -6,57 +6,98 @@ export default function HomePage({ products, onAddToCart }) {
     return (
         <div>
             {/* Hero Section */}
-            <section className="hero">
-                <div className="hero-content">
-                    <h1>Farm-to-Cup Coffee Marketplace</h1>
-                    <p>Connect directly with coffee farmers and discover premium unroasted beans from around the world</p>
-                    <button className="cta-button">Explore Coffee</button>
-                </div>
-            </section>
+            <div className="hero-section">
+                <h1 className="hero-title">
+                    ☕ Welcome to CoffeeDirect
+                </h1>
+                <p className="hero-subtitle">
+                    Premium Ethiopian Coffee - Direct from Farm to Cup
+                </p>
+            </div>
 
             {/* Featured Products Section */}
-            <section className="featured-section">
-                <h2 className="section-title">Featured Coffee Beans</h2>
+            <div className="featured-section">
+                <h2 className="section-title">Featured Coffee</h2>
                 <div className="products-grid">
-                    {featuredProducts.map(product => (
-                        <div key={product.id} className="product-card">
+                    {featuredProducts.map((product, index) => (
+                        <div 
+                            key={product.id} 
+                            className="product-card"
+                            style={{ animationDelay: `${index * 0.2}s` }}
+                        >
                             <img 
                                 src={product.image} 
                                 alt={product.coffeeName}
                                 className="product-image"
                             />
                             <div className="product-info">
-                                <div className="farmer-name">{product.farmerName}</div>
-                                <h3 className="coffee-name">{product.coffeeName}</h3>
-                                <div className="origin">📍 {product.origin}</div>
-                                <span className="roast-level">{product.roastLevel}</span>
-                                {product.qualityLevel && (
-                                    <span className={`quality-badge quality-grade-${product.qualityLevel.includes('Grade 1') ? '1' : product.qualityLevel.includes('Grade 2') ? '2' : '3'}`}>
+                                <h3 className="product-name">
+                                    {product.coffeeName}
+                                </h3>
+                                <p className="product-origin">
+                                    🌍 {product.origin}
+                                </p>
+                                <p className="product-description">
+                                    {product.description}
+                                </p>
+                                
+                                <div className="product-badges">
+                                    <span className={`quality-badge quality-${product.qualityLevel.toLowerCase().replace(' ', '-')}`}>
                                         {product.qualityLevel}
                                     </span>
-                                )}
-                                {product.certification && (
-                                    <span className="certification-badge">{product.certification}</span>
-                                )}
-                                <p className="description">{product.description}</p>
-                                <div className="price">{product.price}</div>
-                                <div className="available">Available: {product.available} lbs</div>
-                                <button className="buy-button" onClick={() => onAddToCart(product)}>Add to Cart</button>
+                                    {product.certification && (
+                                        <span className="certification-badge">
+                                            {product.certification}
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '1rem'
+                                }}>
+                                    <span className="product-price">
+                                        {product.price}
+                                    </span>
+                                    <span style={{
+                                        color: product.available ? 'var(--success-color)' : 'var(--error-color)',
+                                        fontWeight: '600',
+                                        fontSize: '0.9rem'
+                                    }}>
+                                        {product.available ? '✅ In Stock' : '❌ Out of Stock'}
+                                    </span>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => onAddToCart(product)}
+                                    disabled={!product.available}
+                                    className="add-to-cart-btn"
+                                    style={{
+                                        background: product.available ? 'var(--gradient-primary)' : '#6c757d',
+                                        cursor: product.available ? 'pointer' : 'not-allowed'
+                                    }}
+                                >
+                                    {product.available ? '🛒 Add to Cart' : 'Out of Stock'}
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
-            </section>
+            </div>
 
             {/* About Section */}
-            <section style={{ 
-                background: 'white', 
+            <div style={{ 
+                background: 'var(--card-background)', 
                 padding: '4rem 2rem', 
                 textAlign: 'center',
-                maxWidth: '1200px',
-                margin: '0 auto'
+                borderRadius: 'var(--border-radius)',
+                boxShadow: 'var(--shadow-light)',
+                border: '1px solid var(--border-color)',
+                marginTop: '3rem'
             }}>
-                <h2 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#2c1810' }}>
+                <h2 className="section-title">
                     Why Choose CoffeeDirect?
                 </h2>
                 <div style={{ 
@@ -65,20 +106,38 @@ export default function HomePage({ products, onAddToCart }) {
                     gap: '2rem',
                     marginTop: '2rem'
                 }}>
-                    <div>
-                        <h3 style={{ color: '#8B4513', marginBottom: '1rem' }}>🌱 Direct from Farmers</h3>
-                        <p>Buy coffee beans directly from farmers, ensuring fair prices and supporting local communities.</p>
+                    <div className="hover-lift" style={{
+                        background: 'var(--background-color)',
+                        padding: '2rem',
+                        borderRadius: 'var(--border-radius)',
+                        border: '1px solid var(--border-color)',
+                        transition: 'var(--transition)'
+                    }}>
+                        <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '1.3rem' }}>🌱 Direct from Farmers</h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>Buy coffee beans directly from farmers, ensuring fair prices and supporting local communities.</p>
                     </div>
-                    <div>
-                        <h3 style={{ color: '#8B4513', marginBottom: '1rem' }}>☕ Premium Quality</h3>
-                        <p>Access to the finest unroasted coffee beans from renowned coffee-growing regions worldwide.</p>
+                    <div className="hover-lift" style={{
+                        background: 'var(--background-color)',
+                        padding: '2rem',
+                        borderRadius: 'var(--border-radius)',
+                        border: '1px solid var(--border-color)',
+                        transition: 'var(--transition)'
+                    }}>
+                        <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '1.3rem' }}>☕ Premium Quality</h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>Access to the finest unroasted coffee beans from renowned coffee-growing regions worldwide.</p>
                     </div>
-                    <div>
-                        <h3 style={{ color: '#8B4513', marginBottom: '1rem' }}>🌍 Sustainable</h3>
-                        <p>Support sustainable farming practices and environmentally conscious coffee production.</p>
+                    <div className="hover-lift" style={{
+                        background: 'var(--background-color)',
+                        padding: '2rem',
+                        borderRadius: 'var(--border-radius)',
+                        border: '1px solid var(--border-color)',
+                        transition: 'var(--transition)'
+                    }}>
+                        <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '1.3rem' }}>🌍 Sustainable</h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>Support sustainable farming practices and environmentally conscious coffee production.</p>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }

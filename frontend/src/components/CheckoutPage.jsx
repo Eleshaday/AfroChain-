@@ -105,20 +105,14 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
     };
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#2c1810' }}>
+        <div className="checkout-page">
+            <h1 className="section-title">
                 Checkout
             </h1>
 
             {/* Order Summary */}
-            <div style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                marginBottom: '2rem'
-            }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#2c1810' }}>
+            <div className="cart-total">
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
                     Order Summary
                 </h2>
                 
@@ -148,14 +142,8 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
             </div>
 
             {/* Payment Method */}
-            <div style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                marginBottom: '2rem'
-            }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#2c1810' }}>
+            <div className="checkout-form">
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>
                     Payment Method
                 </h2>
                 
@@ -197,27 +185,22 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
 
                 {paymentMethod === 'blockchain' && (
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                            Wallet Address:
-                        </label>
-                        <input
-                            type="text"
-                            value={walletAddress}
-                            onChange={(e) => setWalletAddress(e.target.value)}
-                            placeholder={network === 'ethereum' ? "Enter your Ethereum address (0x...)" : "Enter your Hedera account ID (0.0.123456)"}
-                            style={{
-                                width: '100%',
-                                padding: '0.8rem',
-                                border: '1px solid #ddd',
-                                borderRadius: '5px',
-                                fontSize: '1rem',
-                                marginBottom: '1rem'
-                            }}
-                        />
+                        <div className="form-group">
+                            <label className="form-label">
+                                Wallet Address:
+                            </label>
+                            <input
+                                type="text"
+                                value={walletAddress}
+                                onChange={(e) => setWalletAddress(e.target.value)}
+                                placeholder={network === 'ethereum' ? "Enter your Ethereum address (0x...)" : "Enter your Hedera account ID (0.0.123456)"}
+                                className="form-input"
+                            />
+                        </div>
                         
                         {network === 'ethereum' && (
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                            <div className="form-group">
+                                <label className="form-label">
                                     Private Key (for transaction signing):
                                 </label>
                                 <input
@@ -225,16 +208,9 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
                                     value={privateKey}
                                     onChange={(e) => setPrivateKey(e.target.value)}
                                     placeholder="Enter your private key (0x...)"
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.8rem',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '5px',
-                                        fontSize: '1rem',
-                                        marginBottom: '1rem'
-                                    }}
+                                    className="form-input"
                                 />
-                                <p style={{ color: '#dc3545', fontSize: '0.8rem', marginBottom: '1rem' }}>
+                                <p style={{ color: 'var(--error-color)', fontSize: '0.8rem', marginBottom: '1rem' }}>
                                     ⚠️ Never share your private key! This is for demonstration only.
                                 </p>
                             </div>
@@ -283,17 +259,9 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPayment
                 <button
                     onClick={handlePayment}
                     disabled={isProcessing || !walletAddress}
-                    style={{
-                        background: isProcessing || !walletAddress ? '#ccc' : '#8B4513',
-                        color: 'white',
-                        padding: '1rem 2rem',
-                        border: 'none',
-                        borderRadius: '5px',
-                        fontSize: '1.1rem',
-                        cursor: isProcessing || !walletAddress ? 'not-allowed' : 'pointer'
-                    }}
+                    className="payment-btn"
                 >
-                    {isProcessing ? 'Processing...' : 'Pay with Blockchain'}
+                    {isProcessing ? '⏳ Processing...' : '💳 Pay with Blockchain'}
                 </button>
             </div>
 

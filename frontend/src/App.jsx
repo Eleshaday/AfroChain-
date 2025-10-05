@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import ProductsPage from './components/ProductsPage';
-import FarmerPost from './components/FarmerPost';
 import CartPage from './components/CartPage';
 import CheckoutPage from './components/CheckoutPage';
 import TransactionHistory from './components/TransactionHistory';
@@ -172,7 +171,6 @@ export default function App() {
             <main>
                 {currentPage === 'home' && <HomePage products={coffeeProducts} onAddToCart={addToCart} />}
                 {currentPage === 'products' && <ProductsPage products={coffeeProducts} onAddToCart={addToCart} />}
-                {currentPage === 'farmer-post' && <FarmerPost onAddProduct={addNewProduct} />}
                 {currentPage === 'cart' && <CartPage 
                     cart={cart} 
                     onRemoveFromCart={removeFromCart}

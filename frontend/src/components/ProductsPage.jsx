@@ -43,29 +43,38 @@ export default function ProductsPage({ products, onAddToCart }) {
 
     return (
         <div className="products-page">
-            <h1 style={{ fontSize: '2.5rem', textAlign: 'center', marginBottom: '2rem', color: '#2c1810' }}>
+            <h1 className="section-title">
                 All Coffee Products
             </h1>
             
             {/* Filter Section */}
-            <div className="filter-section">
-                <h3 style={{ marginBottom: '1.5rem', color: '#2c1810' }}>Filter Products</h3>
-                <div className="filter-grid">
-                    <div className="filter-group">
-                        <label>Search</label>
+            <div style={{
+                background: 'var(--card-background)',
+                padding: '2rem',
+                borderRadius: 'var(--border-radius)',
+                marginBottom: '2rem',
+                boxShadow: 'var(--shadow-light)',
+                border: '1px solid var(--border-color)'
+            }}>
+                <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.3rem' }}>Filter Products</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                    <div className="form-group">
+                        <label className="form-label">Search</label>
                         <input
                             type="text"
                             placeholder="Search coffee, farmer, or description..."
                             value={filters.search}
                             onChange={(e) => handleFilterChange('search', e.target.value)}
+                            className="form-input"
                         />
                     </div>
                     
-                    <div className="filter-group">
-                        <label>Origin</label>
+                    <div className="form-group">
+                        <label className="form-label">Origin</label>
                         <select
                             value={filters.origin}
                             onChange={(e) => handleFilterChange('origin', e.target.value)}
+                            className="form-select"
                         >
                             <option value="">All Origins</option>
                             {uniqueOrigins.map(origin => (
@@ -74,11 +83,12 @@ export default function ProductsPage({ products, onAddToCart }) {
                         </select>
                     </div>
                     
-                    <div className="filter-group">
-                        <label>Price Range</label>
+                    <div className="form-group">
+                        <label className="form-label">Price Range</label>
                         <select
                             value={filters.priceRange}
                             onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+                            className="form-select"
                         >
                             <option value="">All Prices</option>
                             <option value="0-10">Under $10</option>
@@ -88,19 +98,15 @@ export default function ProductsPage({ products, onAddToCart }) {
                         </select>
                     </div>
                     
-                    <div className="filter-group">
+                    <div className="form-group">
                         <button 
                             onClick={() => {
                                 setFilters({ origin: '', priceRange: '', search: '' });
                                 setFilteredProducts(products);
                             }}
+                            className="add-to-cart-btn"
                             style={{
-                                background: '#8B4513',
-                                color: 'white',
-                                border: 'none',
-                                padding: '0.8rem 1.5rem',
-                                borderRadius: '5px',
-                                cursor: 'pointer',
+                                background: 'var(--gradient-primary)',
                                 marginTop: '1.5rem'
                             }}
                         >
@@ -113,30 +119,63 @@ export default function ProductsPage({ products, onAddToCart }) {
             {/* Products Grid */}
             <div className="products-grid">
                 {filteredProducts.length > 0 ? (
-                    filteredProducts.map(product => (
-                        <div key={product.id} className="product-card">
+                    filteredProducts.map((product, index) => (
+                        <div 
+                            key={product.id} 
+                            className="product-card"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                        >
                             <img 
                                 src={product.image} 
                                 alt={product.coffeeName}
                                 className="product-image"
                             />
                             <div className="product-info">
-                                <div className="farmer-name">{product.farmerName}</div>
-                                <h3 className="coffee-name">{product.coffeeName}</h3>
-                                <div className="origin">📍 {product.origin}</div>
-                                <span className="roast-level">{product.roastLevel}</span>
-                                {product.qualityLevel && (
-                                    <span className={`quality-badge quality-grade-${product.qualityLevel.includes('Grade 1') ? '1' : product.qualityLevel.includes('Grade 2') ? '2' : '3'}`}>
+                                <h3 className="product-name">
+                                    {product.coffeeName}
+                                </h3>
+                                <p className="product-origin">
+                                    🌍 {product.origin}
+                                </p>
+                                <p className="product-description">
+                                    {product.description}
+                                </p>
+                                
+                                <div className="product-badges">
+                                    <span className={`quality-badge quality-${product.qualityLevel.toLowerCase().replace(' ', '-')}`}>
                                         {product.qualityLevel}
                                     </span>
-                                )}
-                                {product.certification && (
-                                    <span className="certification-badge">{product.certification}</span>
-                                )}
-                                <p className="description">{product.description}</p>
-                                <div className="price">{product.price}</div>
-                                <div className="available">Available: {product.available} lbs</div>
-                                <button className="buy-button" onClick={() => onAddToCart(product)}>Add to Cart</button>
+                                    {product.certification && (
+                                        <span className="certification-badge">
+                                            {product.certification}
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '1rem'
+                                }}>
+                                    <span className="product-price">
+                                        {product.price}
+                                    </span>
+                                    <span style={{
+                                        color: 'var(--text-secondary)',
+                                        fontWeight: '600',
+                                        fontSize: '0.9rem'
+                                    }}>
+                                        Available: {product.available} lbs
+                                    </span>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => onAddToCart(product)}
+                                    className="add-to-cart-btn"
+                                >
+                                    🛒 Add to Cart
+                                </button>
                             </div>
                         </div>
                     ))
