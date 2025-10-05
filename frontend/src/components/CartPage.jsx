@@ -35,9 +35,17 @@ export default function CartPage({ cart, onRemoveFromCart, onUpdateQuantity, onP
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#2c1810' }}>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#2c1810' }}>
                 Shopping Cart
             </h1>
+            <p style={{ 
+                textAlign: 'center', 
+                color: '#28a745', 
+                marginBottom: '2rem',
+                fontSize: '0.9rem'
+            }}>
+                💾 Cart automatically saved to your browser
+            </p>
 
             <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
                 {cart.map(item => (

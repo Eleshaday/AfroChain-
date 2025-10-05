@@ -5,6 +5,20 @@ const { releaseToFarmer, refundBuyer } = require('./contractActions');
 const blockchainService = require('./blockchainService');
 
 const app = express();
+
+// Enable CORS for all routes
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
 app.use(bodyParser.json());
 
 app.post('/api/deploy', async (req, res) => {

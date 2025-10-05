@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function CheckoutPage({ cart, totalPrice, onBackToCart }) {
+export default function CheckoutPage({ cart, totalPrice, onBackToCart, onPaymentSuccess }) {
     const [paymentMethod, setPaymentMethod] = useState('blockchain');
     const [walletAddress, setWalletAddress] = useState('');
     const [privateKey, setPrivateKey] = useState('');
@@ -22,6 +22,20 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart }) {
         setIsProcessing(true);
         
         try {
+            console.log('Sending payment request to:', 'http://localhost:4000/api/process-payment');
+            console.log('Payment data:', {
+                walletAddress,
+                privateKey: network === 'ethereum' ? privateKey : undefined,
+                amount: totalPrice,
+                network,
+                items: cart.map(item => ({
+                    id: item.id,
+                    name: item.coffeeName,
+                    quantity: item.quantity,
+                    price: parseFloat(item.price.replace('$', ''))
+                }))
+            });
+
             const response = await fetch('http://localhost:4000/api/process-payment', {
                 method: 'POST',
                 headers: {
@@ -41,11 +55,45 @@ export default function CheckoutPage({ cart, totalPrice, onBackToCart }) {
                 })
             });
 
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
+            console.log('Payment result:', result);
             
             if (result.success) {
                 setTransactionHash(result.transactionHash);
-                alert(`Payment processed successfully! Transaction Hash: ${result.transactionHash}`);
+                
+                // Store transaction in localStorage for history
+                const transaction = {
+                    id: Date.now(),
+                    hash: result.transactionHash,
+                    amount: totalPrice,
+                    network: result.network,
+                    items: cart.map(item => ({
+                        name: item.coffeeName,
+                        quantity: item.quantity,
+                        price: parseFloat(item.price.replace('$', ''))
+                    })),
+                    timestamp: new Date().toISOString(),
+                    status: 'completed'
+                };
+                
+                // Save to transaction history
+                const existingTransactions = JSON.parse(localStorage.getItem('transactionHistory') || '[]');
+                existingTransactions.unshift(transaction);
+                localStorage.setItem('transactionHistory', JSON.stringify(existingTransactions));
+                
+                alert(`Payment processed successfully! Transaction Hash: ${result.transactionHash}\n\nRedirecting to transaction history...`);
+                
+                // Quick redirect to transaction history after successful payment
+                setTimeout(() => {
+                    onPaymentSuccess();
+                }, 500);
             } else {
                 alert('Payment failed: ' + result.error);
             }

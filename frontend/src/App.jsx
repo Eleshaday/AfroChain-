@@ -5,11 +5,16 @@ import ProductsPage from './components/ProductsPage';
 import FarmerPost from './components/FarmerPost';
 import CartPage from './components/CartPage';
 import CheckoutPage from './components/CheckoutPage';
+import TransactionHistory from './components/TransactionHistory';
 import './App.css';
 
 export default function App() {
     const [currentPage, setCurrentPage] = useState('home');
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState(() => {
+        // Load cart from localStorage on component mount
+        const savedCart = localStorage.getItem('coffeeCart');
+        return savedCart ? JSON.parse(savedCart) : [];
+    });
     const [cartNotification, setCartNotification] = useState(0);
     const [coffeeProducts, setCoffeeProducts] = useState([
         {
@@ -70,17 +75,27 @@ export default function App() {
         setCoffeeProducts([...coffeeProducts, { ...newProduct, id: coffeeProducts.length + 1 }]);
     };
 
+    // Save cart to localStorage whenever cart changes
+    const saveCartToStorage = (newCart) => {
+        localStorage.setItem('coffeeCart', JSON.stringify(newCart));
+        setCart(newCart);
+    };
+
     const addToCart = (product, quantity = 1) => {
         const existingItem = cart.find(item => item.id === product.id);
+        let newCart;
+        
         if (existingItem) {
-            setCart(cart.map(item => 
+            newCart = cart.map(item => 
                 item.id === product.id 
                     ? { ...item, quantity: item.quantity + quantity }
                     : item
-            ));
+            );
         } else {
-            setCart([...cart, { ...product, quantity }]);
+            newCart = [...cart, { ...product, quantity }];
         }
+        
+        saveCartToStorage(newCart);
         setCartNotification(cartNotification + 1);
         
         // Show notification
@@ -104,18 +119,20 @@ export default function App() {
     };
 
     const removeFromCart = (productId) => {
-        setCart(cart.filter(item => item.id !== productId));
+        const newCart = cart.filter(item => item.id !== productId);
+        saveCartToStorage(newCart);
     };
 
     const updateQuantity = (productId, newQuantity) => {
         if (newQuantity <= 0) {
             removeFromCart(productId);
         } else {
-            setCart(cart.map(item => 
+            const newCart = cart.map(item => 
                 item.id === productId 
                     ? { ...item, quantity: newQuantity }
                     : item
-            ));
+            );
+            saveCartToStorage(newCart);
         }
     };
 
@@ -126,6 +143,22 @@ export default function App() {
         }, 0);
     };
 
+    const clearCart = () => {
+        saveCartToStorage([]);
+        setCartNotification(0);
+    };
+
+    // Simulate logout/login functionality
+    const simulateLogout = () => {
+        // Cart persists even after "logout" because it's stored in localStorage
+        alert('Logged out! Your cart is still saved in your browser.');
+    };
+
+    const simulateLogin = () => {
+        // Cart is automatically loaded from localStorage on "login"
+        alert('Logged in! Your saved cart has been restored.');
+    };
+
     return (
         <div className="app">
             <Header 
@@ -133,6 +166,8 @@ export default function App() {
                 setCurrentPage={setCurrentPage} 
                 cartCount={cart.length}
                 cartNotification={cartNotification}
+                onLogout={simulateLogout}
+                onLogin={simulateLogin}
             />
             <main>
                 {currentPage === 'home' && <HomePage products={coffeeProducts} onAddToCart={addToCart} />}
@@ -149,7 +184,12 @@ export default function App() {
                     cart={cart}
                     totalPrice={getTotalPrice()}
                     onBackToCart={() => setCurrentPage('cart')}
+                    onPaymentSuccess={() => {
+                        clearCart();
+                        setCurrentPage('transactions');
+                    }}
                 />}
+                {currentPage === 'transactions' && <TransactionHistory />}
             </main>
         </div>
     );
