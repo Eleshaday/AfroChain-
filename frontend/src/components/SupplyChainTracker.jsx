@@ -16,7 +16,7 @@ export default function SupplyChainTracker({ batchId, coffeeProduct }) {
         setError(null);
         
         try {
-            const response = await fetch(`http://localhost:4000/api/supply-chain/${batchId}`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/supply-chain/${batchId}`);
             const data = await response.json();
             
             if (data.success) {

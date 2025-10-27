@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CustomAlert from './CustomAlert';
 
 export default function SmartEscrow({ onBack }) {
     const [escrowId, setEscrowId] = useState('');
@@ -9,6 +10,11 @@ export default function SmartEscrow({ onBack }) {
     const [description, setDescription] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [escrowResult, setEscrowResult] = useState(null);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertData, setAlertData] = useState({});
+    const [showDisputeDialog, setShowDisputeDialog] = useState(false);
+    const [disputeEscrowId, setDisputeEscrowId] = useState(null);
+    const [disputeReason, setDisputeReason] = useState('');
 
     // Mock escrow data for demonstration
     const [escrows, setEscrows] = useState([
@@ -43,7 +49,13 @@ export default function SmartEscrow({ onBack }) {
 
     const handleCreateEscrow = async () => {
         if (!farmerAddress || !arbiterAddress || !amount || !coffeeBatchId) {
-            alert('Please fill in all required fields');
+            setAlertData({
+                type: 'warning',
+                title: 'Missing Information',
+                message: 'Please fill in all required fields: Farmer Address, Arbiter Address, Amount, and Product Batch ID',
+                transactionHash: null
+            });
+            setShowAlert(true);
             return;
         }
 
@@ -100,26 +112,68 @@ export default function SmartEscrow({ onBack }) {
                     : escrow
             ));
             
-            alert('Delivery approved! Payment released to farmer.');
+            setAlertData({
+                type: 'success',
+                title: 'Delivery Approved! ✅',
+                message: 'Payment has been successfully released to the farmer. The escrow has been marked as completed.',
+                transactionHash: null
+            });
+            setShowAlert(true);
         } catch (error) {
-            alert('Failed to approve delivery');
+            setAlertData({
+                type: 'error',
+                title: 'Approval Failed',
+                message: 'Failed to approve delivery. Please try again.',
+                transactionHash: null
+            });
+            setShowAlert(true);
         }
     };
 
-    const handleRaiseDispute = async (escrowId) => {
-        const reason = prompt('Please provide a reason for the dispute:');
-        if (reason) {
-            try {
-                setEscrows(escrows.map(escrow => 
-                    escrow.id === escrowId 
-                        ? { ...escrow, status: 'disputed', disputed: true, disputeReason: reason }
-                        : escrow
-                ));
-                
-                alert('Dispute raised successfully!');
-            } catch (error) {
-                alert('Failed to raise dispute');
-            }
+    const handleRaiseDispute = (escrowId) => {
+        setDisputeEscrowId(escrowId);
+        setDisputeReason('');
+        setShowDisputeDialog(true);
+    };
+
+    const submitDispute = async () => {
+        if (!disputeReason.trim()) {
+            setAlertData({
+                type: 'warning',
+                title: 'Missing Information',
+                message: 'Please provide a reason for the dispute',
+                transactionHash: null
+            });
+            setShowAlert(true);
+            return;
+        }
+
+        try {
+            setEscrows(escrows.map(escrow => 
+                escrow.id === disputeEscrowId 
+                    ? { ...escrow, status: 'disputed', disputed: true, disputeReason: disputeReason }
+                    : escrow
+            ));
+            
+            setShowDisputeDialog(false);
+            setDisputeReason('');
+            setDisputeEscrowId(null);
+            
+            setAlertData({
+                type: 'success',
+                title: 'Dispute Raised ⚖️',
+                message: 'Your dispute has been submitted successfully. An arbiter will review the case and make a decision.',
+                transactionHash: null
+            });
+            setShowAlert(true);
+        } catch (error) {
+            setAlertData({
+                type: 'error',
+                title: 'Failed to Raise Dispute',
+                message: 'Could not submit dispute. Please try again.',
+                transactionHash: null
+            });
+            setShowAlert(true);
         }
     };
 
@@ -131,9 +185,21 @@ export default function SmartEscrow({ onBack }) {
                     : escrow
             ));
             
-            alert('Auto-refund executed! Payment returned to buyer.');
+            setAlertData({
+                type: 'success',
+                title: 'Auto-Refund Executed 💰',
+                message: 'The payment has been automatically refunded to the buyer. The escrow has been closed.',
+                transactionHash: null
+            });
+            setShowAlert(true);
         } catch (error) {
-            alert('Failed to execute auto-refund');
+            setAlertData({
+                type: 'error',
+                title: 'Refund Failed',
+                message: 'Failed to execute auto-refund. Please contact support.',
+                transactionHash: null
+            });
+            setShowAlert(true);
         }
     };
 
@@ -499,60 +565,123 @@ export default function SmartEscrow({ onBack }) {
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                    {escrow.status === 'active' && (
-                                        <>
+                                {/* Action Buttons Section */}
+                                {escrow.status === 'active' && (
+                                    <div style={{
+                                        background: 'rgba(34, 139, 34, 0.05)',
+                                        padding: '1rem',
+                                        borderRadius: 'var(--border-radius)',
+                                        border: '1px solid rgba(34, 139, 34, 0.2)',
+                                        marginTop: '1rem'
+                                    }}>
+                                        <h4 style={{
+                                            margin: '0 0 0.75rem 0',
+                                            color: 'var(--primary)',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '600'
+                                        }}>
+                                            Transaction Actions:
+                                        </h4>
+                                        
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            gap: '0.75rem',
+                                            flexWrap: 'wrap'
+                                        }}>
                                             <button
                                                 onClick={() => handleApproveDelivery(escrow.id)}
                                                 style={{
-                                                    background: 'var(--success-color)',
+                                                    background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
                                                     color: 'white',
                                                     border: 'none',
-                                                    padding: '0.75rem 1.5rem',
-                                                    borderRadius: 'var(--border-radius)',
+                                                    padding: '0.75rem 1.25rem',
+                                                    borderRadius: '25px',
                                                     cursor: 'pointer',
                                                     fontSize: '0.9rem',
-                                                    fontWeight: '600'
+                                                    fontWeight: '600',
+                                                    boxShadow: '0 2px 4px rgba(40, 167, 69, 0.2)',
+                                                    transition: 'all 0.2s ease',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.target.style.transform = 'translateY(-1px)';
+                                                    e.target.style.boxShadow = '0 4px 8px rgba(40, 167, 69, 0.3)';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.target.style.transform = 'translateY(0)';
+                                                    e.target.style.boxShadow = '0 2px 4px rgba(40, 167, 69, 0.2)';
                                                 }}
                                             >
-                                                ✅ Approve Delivery
+                                                <span>✅</span>
+                                                <span>Approve Delivery</span>
                                             </button>
+                                            
                                             <button
                                                 onClick={() => handleRaiseDispute(escrow.id)}
                                                 style={{
-                                                    background: 'var(--warning-color)',
+                                                    background: 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)',
                                                     color: 'white',
                                                     border: 'none',
-                                                    padding: '0.75rem 1.5rem',
-                                                    borderRadius: 'var(--border-radius)',
+                                                    padding: '0.75rem 1.25rem',
+                                                    borderRadius: '25px',
                                                     cursor: 'pointer',
                                                     fontSize: '0.9rem',
-                                                    fontWeight: '600'
+                                                    fontWeight: '600',
+                                                    boxShadow: '0 2px 4px rgba(255, 193, 7, 0.2)',
+                                                    transition: 'all 0.2s ease',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.target.style.transform = 'translateY(-1px)';
+                                                    e.target.style.boxShadow = '0 4px 8px rgba(255, 193, 7, 0.3)';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.target.style.transform = 'translateY(0)';
+                                                    e.target.style.boxShadow = '0 2px 4px rgba(255, 193, 7, 0.2)';
                                                 }}
                                             >
-                                                ⚠️ Raise Dispute
+                                                <span>⚠️</span>
+                                                <span>Raise Dispute</span>
                                             </button>
-                                        </>
-                                    )}
-                                    
-                                    {formatTimeRemaining(escrow.autoRefundTime) === 'Auto-refund available' && escrow.status === 'active' && (
-                                        <button
-                                            onClick={() => handleAutoRefund(escrow.id)}
-                                            style={{
-                                                background: '#17a2b8',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '0.75rem 1.5rem',
-                                                borderRadius: 'var(--border-radius)',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                fontWeight: '600'
-                                            }}
-                                        >
-                                            💰 Auto-Refund
-                                        </button>
-                                    )}
-                                </div>
+                                            
+                                            {formatTimeRemaining(escrow.autoRefundTime) === 'Auto-refund available' && (
+                                                <button
+                                                    onClick={() => handleAutoRefund(escrow.id)}
+                                                    style={{
+                                                        background: 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        padding: '0.75rem 1.25rem',
+                                                        borderRadius: '25px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.9rem',
+                                                        fontWeight: '600',
+                                                        boxShadow: '0 2px 4px rgba(23, 162, 184, 0.2)',
+                                                        transition: 'all 0.2s ease',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem'
+                                                    }}
+                                                    onMouseOver={(e) => {
+                                                        e.target.style.transform = 'translateY(-1px)';
+                                                        e.target.style.boxShadow = '0 4px 8px rgba(23, 162, 184, 0.3)';
+                                                    }}
+                                                    onMouseOut={(e) => {
+                                                        e.target.style.transform = 'translateY(0)';
+                                                        e.target.style.boxShadow = '0 2px 4px rgba(23, 162, 184, 0.2)';
+                                                    }}
+                                                >
+                                                    <span>💰</span>
+                                                    <span>Auto-Refund</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -595,6 +724,104 @@ export default function SmartEscrow({ onBack }) {
                     </div>
                 </div>
             </div>
+            
+            {/* Dispute Dialog */}
+            {showDisputeDialog && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10000,
+                    padding: '1rem'
+                }}>
+                    <div style={{
+                        background: 'white',
+                        borderRadius: 'var(--border-radius)',
+                        padding: '2rem',
+                        maxWidth: '500px',
+                        width: '100%',
+                        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+                    }}>
+                        <h3 style={{ margin: '0 0 1rem 0', color: 'var(--primary)' }}>
+                            ⚖️ Raise Dispute
+                        </h3>
+                        <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-secondary)' }}>
+                            Please provide a detailed reason for raising this dispute:
+                        </p>
+                        
+                        <textarea
+                            value={disputeReason}
+                            onChange={(e) => setDisputeReason(e.target.value)}
+                            placeholder="Describe the issue with this transaction..."
+                            style={{
+                                width: '100%',
+                                minHeight: '120px',
+                                padding: '0.75rem',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: 'var(--border-radius)',
+                                fontSize: '1rem',
+                                fontFamily: 'inherit',
+                                resize: 'vertical',
+                                marginBottom: '1.5rem'
+                            }}
+                        />
+                        
+                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => {
+                                    setShowDisputeDialog(false);
+                                    setDisputeReason('');
+                                    setDisputeEscrowId(null);
+                                }}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: 'var(--background-color)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '25px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={submitDispute}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '25px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    boxShadow: '0 2px 4px rgba(255, 193, 7, 0.3)'
+                                }}
+                            >
+                                Submit Dispute
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Alert */}
+            <CustomAlert
+                isOpen={showAlert}
+                onClose={() => setShowAlert(false)}
+                type={alertData.type}
+                title={alertData.title}
+                message={alertData.message}
+                transactionHash={alertData.transactionHash}
+            />
         </div>
     );
 }

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import CustomAlert from './CustomAlert';
 
 export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBack }) {
     const [paymentMethod, setPaymentMethod] = useState('hedera'); // 'hedera', 'ethereum', 'coffee_token'
+    const [paymentToken, setPaymentToken] = useState('ETH'); // ETH, USDC
     const [recipientAccountId, setRecipientAccountId] = useState('');
-    const [privateKey, setPrivateKey] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentResult, setPaymentResult] = useState(null);
     const [loyaltyReward, setLoyaltyReward] = useState(0);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertData, setAlertData] = useState({});
 
     // Calculate loyalty reward (5% of purchase)
     useEffect(() => {
@@ -16,14 +19,17 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
 
     const handlePayment = async () => {
         if (!recipientAccountId.trim()) {
-            alert('Please enter a recipient account ID');
+            setAlertData({
+                type: 'warning',
+                title: 'Missing Information',
+                message: 'Please enter a recipient account ID to proceed with payment',
+                transactionHash: null
+            });
+            setShowAlert(true);
             return;
         }
 
-        if (paymentMethod === 'ethereum' && !privateKey.trim()) {
-            alert('Please enter your private key for Ethereum payments');
-            return;
-        }
+        // Note: Private key handling removed - wallet will handle signing
 
         setIsProcessing(true);
         setPaymentResult(null);
@@ -33,7 +39,7 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
 
             if (paymentMethod === 'hedera') {
                 // Hedera HBAR payment
-                result = await fetch('http://localhost:4000/api/process-payment', {
+                result = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/process-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -44,22 +50,21 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
                     })
                 });
             } else if (paymentMethod === 'ethereum') {
-                // Ethereum payment
-                result = await fetch('http://localhost:4000/api/process-payment', {
+                // Ethereum payment - wallet will handle signing
+                result = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/process-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         walletAddress: recipientAccountId,
                         amount: totalPrice,
                         network: 'ethereum',
-                        privateKey: privateKey,
                         items: cart
                     })
                 });
             } else if (paymentMethod === 'coffee_token') {
                 // Coffee token payment
                 const tokenId = '0.0.123456'; // Default coffee token ID
-                result = await fetch('http://localhost:4000/api/tokens/payment', {
+                result = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tokens/payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -77,7 +82,7 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
             if (data.success) {
                 // Process loyalty reward
                 try {
-                    const loyaltyResult = await fetch('http://localhost:4000/api/tokens/loyalty/reward', {
+                    const loyaltyResult = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tokens/loyalty/reward`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -143,7 +148,7 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
         switch (method) {
             case 'hedera': return 'Hedera HBAR';
             case 'ethereum': return 'Ethereum ETH';
-            case 'coffee_token': return 'CoffeeDirect Token';
+            case 'coffee_token': return 'AGRITOKEN';
             default: return 'Unknown';
         }
     };
@@ -241,7 +246,7 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                     {method === 'hedera' && 'Fast, low-cost payments on Hedera network'}
                                     {method === 'ethereum' && 'Ethereum network payments (requires gas fees)'}
-                                    {method === 'coffee_token' && 'CoffeeDirect ecosystem token payments'}
+                                    {method === 'coffee_token' && 'AGRITOKEN ecosystem token payments'}
                                 </div>
                             </div>
                         </label>
@@ -282,36 +287,67 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
                 </div>
             </div>
 
-            {/* Private Key (Ethereum only) */}
+            {/* Private Key (Ethereum only) - REMOVED FOR SECURITY */}
             {paymentMethod === 'ethereum' && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '0.5rem', 
+                <div className="form-group">
+                    <label className="form-label">Payment Token:</label>
+                    <select
+                        value={paymentToken}
+                        onChange={(e) => setPaymentToken(e.target.value)}
+                        className="form-input"
+                    >
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="USDC">USD Coin (USDC) - Stablecoin</option>
+                        <option value="USDT">Tether (USDT) - Stablecoin</option>
+                    </select>
+                </div>
+
+                <div style={{
+                    background: 'rgba(40, 167, 69, 0.1)',
+                    padding: '1rem',
+                    borderRadius: 'var(--border-radius)',
+                    border: '1px solid rgba(40, 167, 69, 0.3)',
+                    marginBottom: '1rem'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        color: '#155724',
                         fontWeight: '600',
-                        color: 'var(--text-primary)'
+                        marginBottom: '0.5rem'
                     }}>
-                        Private Key (for signing transaction)
-                    </label>
-                    <input
-                        type="password"
-                        value={privateKey}
-                        onChange={(e) => setPrivateKey(e.target.value)}
-                        placeholder="0x..."
-                        style={{
-                            width: '100%',
-                            padding: '1rem',
-                            border: '2px solid var(--border-color)',
-                            borderRadius: 'var(--border-radius)',
-                            fontSize: '1rem',
-                            background: 'var(--background-color)',
-                            color: 'var(--text-primary)',
-                            transition: 'var(--transition)'
-                        }}
-                    />
-                    <div style={{ fontSize: '0.9rem', color: 'var(--warning-color)', marginTop: '0.5rem' }}>
-                        ⚠️ Private key is used only for signing the transaction and is not stored
+                        🔐 Secure Wallet Integration
                     </div>
+                    <div style={{ color: '#155724', fontSize: '0.9rem' }}>
+                        Your MetaMask wallet will handle transaction signing securely. No private keys are required or stored.
+                    </div>
+                </div>
+
+                {(paymentToken === 'USDC' || paymentToken === 'USDT') && (
+                    <div style={{
+                        background: 'rgba(0, 123, 255, 0.1)',
+                        padding: '1rem',
+                        borderRadius: 'var(--border-radius)',
+                        border: '1px solid rgba(0, 123, 255, 0.3)',
+                        marginBottom: '1rem'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            color: '#004085',
+                            fontWeight: '600',
+                            marginBottom: '0.5rem'
+                        }}>
+                            💰 {paymentToken} Stablecoin
+                        </div>
+                        <div style={{ color: '#004085', fontSize: '0.9rem' }}>
+                            Pay with {paymentToken} for price stability. 1 {paymentToken} = $1 USD. No volatility risk.
+                        </div>
+                    </div>
+                )}
                 </div>
             )}
 
@@ -333,7 +369,7 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
                     🎁 Loyalty Reward
                 </div>
                 <div style={{ color: '#155724', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                    You will receive <strong>{loyaltyReward} COFFEECOIN</strong> tokens as a loyalty reward for this purchase!
+                    You will receive <strong>{loyaltyReward} AGRITOKEN</strong> tokens as a loyalty reward for this purchase!
                 </div>
             </div>
 
@@ -425,6 +461,16 @@ export default function TokenPayment({ cart, totalPrice, onPaymentSuccess, onBac
                     {isProcessing ? '🔄 Processing...' : `💳 Pay ${getPaymentMethodIcon(paymentMethod)} ${totalPrice.toFixed(2)}`}
                 </button>
             </div>
+            
+            {/* Custom Alert */}
+            <CustomAlert
+                isOpen={showAlert}
+                onClose={() => setShowAlert(false)}
+                type={alertData.type}
+                title={alertData.title}
+                message={alertData.message}
+                transactionHash={alertData.transactionHash}
+            />
         </div>
     );
 }

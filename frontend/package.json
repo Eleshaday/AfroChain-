@@ -1,19 +1,35 @@
 {
-  "name": "frontend",
+  "name": "farmerchain-frontend",
   "version": "1.0.0",
-  "description": "",
+  "description": "FarmerChain Frontend - Decentralized agricultural marketplace web application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "react",
+    "blockchain",
+    "agriculture",
+    "marketplace",
+    "web3",
+    "ethereum",
+    "hedera"
+  ],
+  "author": "FarmerChain Team",
+  "license": "MIT",
   "dependencies": {
+    "@hashgraph/sdk": "^2.74.0",
+    "axios": "^1.12.2",
+    "ethers": "^6.15.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "vite": "^7.1.9"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0"
   }
 }

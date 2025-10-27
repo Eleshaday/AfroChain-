@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CustomAlert from './CustomAlert';
 
 export default function FarmerPost({ onAddProduct }) {
     const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ export default function FarmerPost({ onAddProduct }) {
     });
 
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertData, setAlertData] = useState({});
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -28,7 +31,13 @@ export default function FarmerPost({ onAddProduct }) {
         // Validate required fields
         if (!formData.farmerName || !formData.coffeeName || !formData.origin || 
             !formData.description || !formData.price || !formData.available) {
-            alert('Please fill in all required fields');
+            setAlertData({
+                type: 'warning',
+                title: 'Missing Information',
+                message: 'Please fill in all required fields to post your product',
+                transactionHash: null
+            });
+            setShowAlert(true);
             return;
         }
 
@@ -220,6 +229,16 @@ export default function FarmerPost({ onAddProduct }) {
                     <li>Set competitive prices based on market rates</li>
                 </ul>
             </div>
+            
+            {/* Custom Alert */}
+            <CustomAlert
+                isOpen={showAlert}
+                onClose={() => setShowAlert(false)}
+                type={alertData.type}
+                title={alertData.title}
+                message={alertData.message}
+                transactionHash={alertData.transactionHash}
+            />
         </div>
     );
 }

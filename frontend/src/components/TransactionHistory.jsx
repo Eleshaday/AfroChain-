@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function TransactionHistory() {
+export default function TransactionHistory({ onTrackOrder }) {
     const [transactions, setTransactions] = useState([]);
     const [filter, setFilter] = useState('all'); // all, ethereum, hedera
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -268,6 +268,41 @@ export default function TransactionHistory() {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Track Order Button */}
+                        {onTrackOrder && transaction.status === 'completed' && (
+                            <button
+                                onClick={() => onTrackOrder(transaction.id)}
+                                style={{
+                                    width: '100%',
+                                    marginTop: '1rem',
+                                    padding: '0.8rem',
+                                    background: 'var(--gradient-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '25px',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    transition: 'all 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 4px 12px rgba(34, 139, 34, 0.3)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                            >
+                                <i className="fas fa-shipping-fast"></i>
+                                Track Delivery
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

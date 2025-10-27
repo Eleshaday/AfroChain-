@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "id": "1759673441915",
+      "email": "lo@gmail.com",
+      "name": "loop",
+      "passwordHash": "$2a$10$WIOe8jwNdZ3tqCblu2yKs.sCLo4Ksiylc3r.3WBZU6tMsuANc6wsa",
+      "createdAt": "2025-10-05T14:10:41.915Z"
+    },
+    {
+      "id": "1759673512534",
+      "email": "loog@gmail.com",
+      "name": "ab",
+      "passwordHash": "$2a$10$Im1NDHytisuf4gAAUXTgiur.i5iyHSvOav.2DAycstRzsAh3U8BOq",
+      "createdAt": "2025-10-05T14:11:52.534Z"
+    },
+    {
+      "id": "1761548189792",
+      "email": "123@gmail.com",
+      "name": "abc",
+      "passwordHash": "$2a$10$9gf0bukXVX0pH8UbD/um.uflqEglB.carZ5F/IwNt/RUjgBs0Ds3G",
+      "createdAt": "2025-10-27T06:56:29.793Z"
+    }
+  ]
+}

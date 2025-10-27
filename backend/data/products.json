@@ -1,0 +1,113 @@
+[
+  {
+    "id": 1,
+    "productName": "Ethiopian Yirgacheffe Coffee",
+    "category": "Coffee",
+    "origin": "Ethiopia",
+    "description": "Premium single-origin coffee with floral notes and bright acidity",
+    "price": "$24.99",
+    "qualityLevel": "Premium",
+    "certification": "Organic",
+    "batchId": "ETH-YIR-001",
+    "image": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    "farmerWalletAddress": "0x1234567890123456789012345678901234567890",
+    "supplyChainSteps": [
+      { "step": "Harvested", "timestamp": "2024-01-15", "location": "Yirgacheffe, Ethiopia" },
+      { "step": "Processed", "timestamp": "2024-01-16", "location": "Local Processing Plant" },
+      { "step": "Quality Tested", "timestamp": "2024-01-17", "location": "Ethiopian Coffee Lab" },
+      { "step": "Packaged", "timestamp": "2024-01-18", "location": "Addis Ababa Packaging Facility" },
+      { "step": "Shipped", "timestamp": "2024-01-20", "location": "Ethiopian Port" }
+    ],
+    "createdAt": "2024-01-15T00:00:00.000Z",
+    "updatedAt": "2024-01-20T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "productName": "Organic Quinoa",
+    "category": "Grains",
+    "origin": "Peru",
+    "description": "High-protein ancient grain perfect for healthy meals",
+    "price": "$12.99",
+    "qualityLevel": "Organic",
+    "certification": "USDA Organic",
+    "batchId": "PER-QUI-001",
+    "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    "farmerWalletAddress": "0x2345678901234567890123456789012345678901",
+    "supplyChainSteps": [
+      { "step": "Harvested", "timestamp": "2024-01-10", "location": "Andes Mountains, Peru" },
+      { "step": "Cleaned", "timestamp": "2024-01-11", "location": "Local Processing Facility" },
+      { "step": "Quality Tested", "timestamp": "2024-01-12", "location": "Peruvian Agricultural Lab" },
+      { "step": "Packaged", "timestamp": "2024-01-13", "location": "Lima Packaging Plant" },
+      { "step": "Shipped", "timestamp": "2024-01-15", "location": "Callao Port" }
+    ],
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "updatedAt": "2024-01-15T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "productName": "Fresh Avocados",
+    "category": "Fruits",
+    "origin": "Mexico",
+    "description": "Creamy Hass avocados perfect for guacamole and salads",
+    "price": "$8.99",
+    "qualityLevel": "Fresh",
+    "certification": "Fair Trade",
+    "batchId": "MEX-AVO-001",
+    "image": "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    "farmerWalletAddress": "0x3456789012345678901234567890123456789012",
+    "supplyChainSteps": [
+      { "step": "Harvested", "timestamp": "2024-01-12", "location": "Michoacán, Mexico" },
+      { "step": "Sorted", "timestamp": "2024-01-13", "location": "Local Packing House" },
+      { "step": "Quality Tested", "timestamp": "2024-01-14", "location": "Mexican Agricultural Lab" },
+      { "step": "Packaged", "timestamp": "2024-01-15", "location": "Guadalajara Packaging Facility" },
+      { "step": "Shipped", "timestamp": "2024-01-16", "location": "Veracruz Port" }
+    ],
+    "createdAt": "2024-01-12T00:00:00.000Z",
+    "updatedAt": "2024-01-16T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "productName": "Organic Spinach",
+    "category": "Vegetables",
+    "origin": "California",
+    "description": "Fresh organic spinach leaves perfect for salads and cooking",
+    "price": "$6.99",
+    "qualityLevel": "Organic",
+    "certification": "USDA Organic",
+    "batchId": "CAL-SPI-001",
+    "image": "https://images.unsplash.com/photo-1576045057995-568f588f82fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    "farmerWalletAddress": "0x4567890123456789012345678901234567890123",
+    "supplyChainSteps": [
+      { "step": "Harvested", "timestamp": "2024-01-14", "location": "Salinas Valley, California" },
+      { "step": "Washed", "timestamp": "2024-01-15", "location": "Local Processing Plant" },
+      { "step": "Quality Tested", "timestamp": "2024-01-16", "location": "California Agricultural Lab" },
+      { "step": "Packaged", "timestamp": "2024-01-17", "location": "Fresno Packaging Facility" },
+      { "step": "Shipped", "timestamp": "2024-01-18", "location": "Los Angeles Distribution Center" }
+    ],
+    "createdAt": "2024-01-14T00:00:00.000Z",
+    "updatedAt": "2024-01-18T00:00:00.000Z"
+  },
+  {
+    "id": 5,
+    "productName": "Premium Turmeric",
+    "category": "Spices",
+    "origin": "India",
+    "description": "Golden turmeric powder with anti-inflammatory properties",
+    "price": "$15.99",
+    "qualityLevel": "Premium",
+    "certification": "Organic",
+    "batchId": "IND-TUR-001",
+    "image": "https://images.unsplash.com/photo-1609501676725-7186f71a4b1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    "farmerWalletAddress": "0x5678901234567890123456789012345678901234",
+    "supplyChainSteps": [
+      { "step": "Harvested", "timestamp": "2024-01-08", "location": "Kerala, India" },
+      { "step": "Dried", "timestamp": "2024-01-09", "location": "Local Drying Facility" },
+      { "step": "Ground", "timestamp": "2024-01-10", "location": "Spice Processing Plant" },
+      { "step": "Quality Tested", "timestamp": "2024-01-11", "location": "Indian Spice Lab" },
+      { "step": "Packaged", "timestamp": "2024-01-12", "location": "Mumbai Packaging Facility" },
+      { "step": "Shipped", "timestamp": "2024-01-13", "location": "Mumbai Port" }
+    ],
+    "createdAt": "2024-01-08T00:00:00.000Z",
+    "updatedAt": "2024-01-13T00:00:00.000Z"
+  }
+]

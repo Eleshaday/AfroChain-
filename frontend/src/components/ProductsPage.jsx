@@ -1,125 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ProductCategories from './ProductCategories';
 
 export default function ProductsPage({ products, onAddToCart, onVerifyProduct }) {
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [filteredProducts, setFilteredProducts] = useState(products);
-    const [filters, setFilters] = useState({
-        origin: '',
-        priceRange: '',
-        search: ''
-    });
 
-    const handleFilterChange = (filterType, value) => {
-        const newFilters = { ...filters, [filterType]: value };
-        setFilters(newFilters);
-        
+    useEffect(() => {
         let filtered = products;
         
-        if (newFilters.origin) {
-            filtered = filtered.filter(product => 
-                product.origin.toLowerCase().includes(newFilters.origin.toLowerCase())
-            );
+        // Filter by category
+        if (selectedCategory) {
+            filtered = filtered.filter(product => product.category === selectedCategory);
         }
-        
-        if (newFilters.search) {
+
+        // Filter by search query
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
             filtered = filtered.filter(product => 
-                product.coffeeName.toLowerCase().includes(newFilters.search.toLowerCase()) ||
-                product.farmerName.toLowerCase().includes(newFilters.search.toLowerCase()) ||
-                product.description.toLowerCase().includes(newFilters.search.toLowerCase())
+                (product.productName || product.coffeeName || '').toLowerCase().includes(query) ||
+                product.description.toLowerCase().includes(query) ||
+                product.origin.toLowerCase().includes(query) ||
+                product.category.toLowerCase().includes(query)
             );
-        }
-        
-        if (newFilters.priceRange) {
-            const [min, max] = newFilters.priceRange.split('-').map(p => parseFloat(p.replace('$', '')));
-            filtered = filtered.filter(product => {
-                const price = parseFloat(product.price.replace('$', ''));
-                return price >= min && price <= max;
-            });
         }
         
         setFilteredProducts(filtered);
+    }, [products, selectedCategory, searchQuery]);
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category === selectedCategory ? '' : category);
     };
 
-    const uniqueOrigins = [...new Set(products.map(p => p.origin))];
+    useEffect(() => {
+        // Scroll animations for product cards
+        const setupScrollAnimations = () => {
+            const productCards = document.querySelectorAll('.product-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            productCards.forEach((card, index) => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+                observer.observe(card);
+            });
+        };
+
+        setupScrollAnimations();
+    }, [filteredProducts]);
 
     return (
         <div className="products-page">
-            <h1 className="section-title">
-                All Coffee Products
+            {/* Header */}
+            <header className="products-header">
+                <div className="container">
+                    <div className="header-content">
+                        <h1 className="page-title">
+                            <i className="fas fa-seedling"></i>
+                            Agricultural Products
             </h1>
-            
-            {/* Filter Section */}
-            <div style={{
-                background: 'var(--card-background)',
-                padding: '2rem',
-                borderRadius: 'var(--border-radius)',
-                marginBottom: '2rem',
-                boxShadow: 'var(--shadow-light)',
-                border: '1px solid var(--border-color)'
-            }}>
-                <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.3rem' }}>Filter Products</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                    <div className="form-group">
-                        <label className="form-label">Search</label>
-                        <input
-                            type="text"
-                            placeholder="Search coffee, farmer, or description..."
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
-                            className="form-input"
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label className="form-label">Origin</label>
-                        <select
-                            value={filters.origin}
-                            onChange={(e) => handleFilterChange('origin', e.target.value)}
-                            className="form-select"
-                        >
-                            <option value="">All Origins</option>
-                            {uniqueOrigins.map(origin => (
-                                <option key={origin} value={origin}>{origin}</option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <label className="form-label">Price Range</label>
-                        <select
-                            value={filters.priceRange}
-                            onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-                            className="form-select"
-                        >
-                            <option value="">All Prices</option>
-                            <option value="0-10">Under $10</option>
-                            <option value="10-15">$10 - $15</option>
-                            <option value="15-20">$15 - $20</option>
-                            <option value="20-999">Over $20</option>
-                        </select>
-                    </div>
-                    
-                    <div className="form-group">
-                        <button 
-                            onClick={() => {
-                                setFilters({ origin: '', priceRange: '', search: '' });
-                                setFilteredProducts(products);
-                            }}
-                            className="add-to-cart-btn"
-                            style={{
-                                background: 'var(--gradient-primary)',
-                                marginTop: '1.5rem'
-                            }}
-                        >
-                            Clear Filters
-                        </button>
+                        <p className="page-subtitle">
+                            Discover fresh products directly from farmers worldwide
+                        </p>
                     </div>
                 </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="products-main">
+                <div className="container">
+                    {/* Search and Filters */}
+                    <div className="search-filters">
+                        <div className="search-bar">
+                            <i className="fas fa-search"></i>
+                        <input
+                            type="text"
+                                placeholder="Search products..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="search-input"
+                        />
+                    </div>
+                    </div>
+                    
+                    {/* Product Categories */}
+                    <ProductCategories
+                        onCategorySelect={handleCategorySelect}
+                        selectedCategory={selectedCategory}
+                    />
+
+                    {/* Results Summary */}
+                    <div className="results-summary">
+                        <h2>
+                            {selectedCategory ? `${selectedCategory} Products` : 'All Products'}
+                            {searchQuery && ` matching "${searchQuery}"`}
+                        </h2>
+                        <p>{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found</p>
             </div>
 
             {/* Products Grid */}
+                    {filteredProducts.length > 0 ? (
             <div className="products-grid">
-                {filteredProducts.length > 0 ? (
-                    filteredProducts.map((product, index) => (
+                            {filteredProducts.map((product, index) => (
                         <div 
                             key={product.id} 
                             className="product-card"
@@ -127,12 +117,12 @@ export default function ProductsPage({ products, onAddToCart, onVerifyProduct })
                         >
                             <img 
                                 src={product.image} 
-                                alt={product.coffeeName}
+                                        alt={product.productName || product.coffeeName}
                                 className="product-image"
                             />
                             <div className="product-info">
                                 <h3 className="product-name">
-                                    {product.coffeeName}
+                                            {product.productName || product.coffeeName}
                                 </h3>
                                 <p className="product-origin">
                                     🌍 {product.origin}
@@ -142,7 +132,12 @@ export default function ProductsPage({ products, onAddToCart, onVerifyProduct })
                                 </p>
                                 
                                 <div className="product-badges">
-                                    <span className={`quality-badge quality-${product.qualityLevel.toLowerCase().replace(' ', '-')}`}>
+                                            {product.category && (
+                                                <span className="category-badge">
+                                                    {product.category}
+                                                </span>
+                                            )}
+                                            <span className={`quality-badge quality-${product.qualityLevel?.toLowerCase().replace(' ', '-')}`}>
                                         {product.qualityLevel}
                                     </span>
                                     {product.certification && (
@@ -152,78 +147,68 @@ export default function ProductsPage({ products, onAddToCart, onVerifyProduct })
                                     )}
                                 </div>
                                 
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    marginBottom: '1rem'
-                                }}>
-                                    <span className="product-price">
-                                        {product.price}
-                                    </span>
-                                    <span style={{
-                                        color: 'var(--text-secondary)',
-                                        fontWeight: '600',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        Available: {product.available} lbs
-                                    </span>
+                                        <div className="product-details">
+                                            <div className="detail-item">
+                                                <span className="detail-label">Price:</span>
+                                                <span className="detail-value">{product.price}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <span className="detail-label">Available:</span>
+                                                <span className="detail-value">{product.available} units</span>
+                                            </div>
+                                            {product.harvestDate && (
+                                                <div className="detail-item">
+                                                    <span className="detail-label">Harvest:</span>
+                                                    <span className="detail-value">{new Date(product.harvestDate).toLocaleDateString()}</span>
+                                                </div>
+                                            )}
                                 </div>
                                 
-                                <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                        <div className="product-actions">
                                     <button 
                                         onClick={() => onAddToCart(product)}
                                         className="add-to-cart-btn"
-                                        style={{ width: '100%' }}
                                     >
-                                        🛒 Add to Cart
+                                                <i className="fas fa-shopping-cart"></i>
+                                                Add to Cart
                                     </button>
-                                    
-                                    {product.authenticityVerified && (
                                         <button 
-                                            onClick={() => onVerifyProduct && onVerifyProduct(product.batchId)}
-                                            className="add-to-cart-btn"
-                                            style={{
-                                                background: 'linear-gradient(135deg, #17a2b8, #138496)',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '0.75rem',
-                                                borderRadius: 'var(--border-radius)',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                fontWeight: '600',
-                                                width: '100%'
-                                            }}
-                                        >
-                                            🔍 Verify Authenticity
+                                                onClick={() => onVerifyProduct(product.batchId)}
+                                                className="verify-btn"
+                                            >
+                                                <i className="fas fa-shield-alt"></i>
+                                                Verify
                                         </button>
-                                    )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
-                    ))
-                ) : (
-                    <div style={{ 
-                        gridColumn: '1 / -1', 
-                        textAlign: 'center', 
-                        padding: '2rem',
-                        color: '#666'
-                    }}>
-                        <h3>No products found matching your filters</h3>
-                        <p>Try adjusting your search criteria</p>
+                    ) : (
+                        <div className="no-products">
+                            <div className="no-products-icon">
+                                <i className="fas fa-search"></i>
+                            </div>
+                            <h3>No products found</h3>
+                            <p>
+                                {searchQuery 
+                                    ? `No products match "${searchQuery}". Try a different search term.`
+                                    : 'No products available in this category.'
+                                }
+                            </p>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setSelectedCategory('');
+                                }}
+                            >
+                                Clear Filters
+                            </button>
                     </div>
                 )}
             </div>
-
-            {/* Results Count */}
-            <div style={{ 
-                textAlign: 'center', 
-                marginTop: '2rem', 
-                color: '#666',
-                fontSize: '1.1rem'
-            }}>
-                Showing {filteredProducts.length} of {products.length} products
-            </div>
+            </main>
         </div>
     );
 }

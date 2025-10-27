@@ -1,25 +1,184 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 const { deployEscrowContract } = require('./deployContract');
 const { releaseToFarmer, refundBuyer } = require('./contractActions');
 const blockchainService = require('./blockchainService');
+const authService = require('./authService');
+const productService = require('./productService');
+const productRoutes = require('./productRoutes');
 
 const app = express();
 
-// Enable CORS for all routes
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
+
+// Compression middleware
+app.use(compression());
+
+// CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? 
+    process.env.ALLOWED_ORIGINS.split(',') : 
+    ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
     } else {
-        next();
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+}));
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// Wallet Authentication routes
+app.post('/api/auth/wallet/authenticate', async (req, res) => {
+    try {
+        const { walletAddress, signature, message } = req.body;
+        
+        if (!walletAddress || !signature || !message) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Wallet address, signature, and message are required' 
+            });
+        }
+
+        const result = await authService.authenticateWallet({ walletAddress, signature, message });
+        const status = result.success ? 200 : 401;
+        res.status(status).json(result);
+    } catch (err) {
+        console.error('Wallet authentication error:', err);
+        res.status(500).json({ success: false, error: 'Authentication failed' });
     }
 });
 
-app.use(bodyParser.json());
+// Generate authentication message
+app.post('/api/auth/wallet/message', async (req, res) => {
+    try {
+        const { walletAddress } = req.body;
+        
+        if (!walletAddress) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Wallet address is required' 
+            });
+        }
+
+        const timestamp = new Date().toISOString();
+        const message = authService.generateAuthMessage(walletAddress, timestamp);
+        
+        res.json({ 
+            success: true, 
+            message, 
+            timestamp,
+            walletAddress 
+        });
+    } catch (err) {
+        console.error('Message generation error:', err);
+        res.status(500).json({ success: false, error: 'Failed to generate message' });
+    }
+});
+
+// Update user profile
+app.put('/api/auth/profile', async (req, res) => {
+    try {
+        const { walletAddress, name, isFarmer } = req.body;
+        
+        if (!walletAddress) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Wallet address is required' 
+            });
+        }
+
+        const result = await authService.updateUserProfile(walletAddress, { name, isFarmer });
+        const status = result.success ? 200 : 400;
+        res.status(status).json(result);
+    } catch (err) {
+        console.error('Profile update error:', err);
+        res.status(500).json({ success: false, error: 'Profile update failed' });
+    }
+});
+
+// Get user profile
+app.get('/api/auth/profile/:walletAddress', async (req, res) => {
+    try {
+        const { walletAddress } = req.params;
+        
+        const result = await authService.getUserByWallet(walletAddress);
+        const status = result.success ? 200 : 404;
+        res.status(status).json(result);
+    } catch (err) {
+        console.error('Get profile error:', err);
+        res.status(500).json({ success: false, error: 'Failed to get profile' });
+    }
+});
+
+// Legacy auth routes (deprecated)
+app.post('/api/auth/signup', async (req, res) => {
+    try {
+        const { email, password, name } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: 'Email and password are required' });
+        }
+        const result = await authService.signup({ email, password, name });
+        const status = result.success ? 200 : 400;
+        res.status(status).json(result);
+    } catch (err) {
+        console.error('Signup error:', err);
+        res.status(500).json({ success: false, error: 'Signup failed' });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: 'Email and password are required' });
+        }
+        const result = await authService.login({ email, password });
+        const status = result.success ? 200 : 401;
+        res.status(status).json(result);
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ success: false, error: 'Login failed' });
+    }
+});
+
+// Product Management routes
+app.use('/api/products', productRoutes);
+
 
 app.post('/api/deploy', async (req, res) => {
     const { farmerAddress, arbiterAddress, amount } = req.body;
@@ -367,4 +526,4 @@ app.post('/api/tokens/loyalty/reward', async (req, res) => {
     }
 });
 
-app.listen(process.env.PORT || 4000, () => console.log('Backend running'));
+app.listen(process.env.PORT || 5000, () => console.log('Backend running'));

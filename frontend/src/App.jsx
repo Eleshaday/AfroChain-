@@ -10,8 +10,10 @@ import SmartEscrow from './components/SmartEscrow';
 import LoyaltySystem from './components/LoyaltySystem';
 import FarmerReputation from './components/FarmerReputation';
 import SustainabilityTracker from './components/SustainabilityTracker';
+import DeliveryTracker from './components/DeliveryTracker';
 import './App.css';
-import Login from './components/Login';
+import WalletConnect from './components/WalletConnect';
+import { mockProducts } from './data/mockProducts';
 
 export default function App() {
     const [currentPage, setCurrentPage] = useState('home');
@@ -22,119 +24,23 @@ export default function App() {
     const [pendingRedirect, setPendingRedirect] = useState(null);
     const [cart, setCart] = useState(() => {
         // Load cart from localStorage on component mount
-        const savedCart = localStorage.getItem('coffeeCart');
+        const savedCart = localStorage.getItem('farmerchainCart');
         return savedCart ? JSON.parse(savedCart) : [];
     });
     const [cartNotification, setCartNotification] = useState(0);
     const [selectedBatchId, setSelectedBatchId] = useState(null);
     const [verificationResult, setVerificationResult] = useState(null);
-    const [selectedCoffeeProduct, setSelectedCoffeeProduct] = useState(null);
-    const [coffeeProducts, setCoffeeProducts] = useState([
-        {
-            id: 1,
-            farmerName: "Sidama Coffee Farmers Cooperative Union",
-            coffeeName: "Sidama Grade 1 Green Beans",
-            origin: "Ethiopia - Sidama Region",
-            roastLevel: "Green (Unroasted)",
-            qualityLevel: "Grade 1 (Highest Quality)",
-            description: "Premium Sidama coffee beans from the birthplace of coffee. Hand-picked from 80,000+ farmers in the Sidama region. Known for its bright acidity, floral notes, and wine-like characteristics.",
-            price: "$18.50/lb",
-            image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
-            available: 100,
-            certification: "Fair Trade Certified",
-            farmId: "SIDAMA-001",
-            harvestDate: "2024-01-15",
-            batchId: "BATCH-SIDAMA-2024-001",
-            nftId: "NFT-SIDAMA-001",
-            authenticityVerified: true,
-            supplyChainSteps: [
-                { step: "Farm Harvest", timestamp: "2024-01-15T06:00:00Z", location: "Sidama Region, Ethiopia" },
-                { step: "Processing", timestamp: "2024-01-16T08:00:00Z", location: "Sidama Processing Plant" },
-                { step: "Quality Control", timestamp: "2024-01-17T10:00:00Z", location: "Ethiopian Coffee Authority" },
-                { step: "Export Preparation", timestamp: "2024-01-18T12:00:00Z", location: "Addis Ababa Port" }
-            ]
-        },
-        {
-            id: 2,
-            farmerName: "Yirgacheffe Coffee Farmers Union",
-            coffeeName: "Yirgacheffe Grade 2 Green Beans",
-            origin: "Ethiopia - Yirgacheffe",
-            roastLevel: "Green (Unroasted)",
-            qualityLevel: "Grade 2 (Premium Quality)",
-            description: "Exceptional Yirgacheffe coffee with bright citrus and floral notes. Grown at high altitude (1,700-2,200m) with traditional processing methods.",
-            price: "$16.75/lb",
-            image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
-            available: 75,
-            certification: "Organic Certified",
-            farmId: "YIRGACHEFFE-002",
-            harvestDate: "2024-02-10",
-            batchId: "BATCH-YIRGA-2024-002",
-            nftId: "NFT-YIRGA-002",
-            authenticityVerified: true,
-            supplyChainSteps: [
-                { step: "Farm Harvest", timestamp: "2024-02-10T06:30:00Z", location: "Yirgacheffe, Ethiopia" },
-                { step: "Wet Processing", timestamp: "2024-02-11T07:00:00Z", location: "Yirgacheffe Processing Center" },
-                { step: "Drying", timestamp: "2024-02-12T08:00:00Z", location: "Yirgacheffe Drying Beds" },
-                { step: "Quality Control", timestamp: "2024-02-13T09:00:00Z", location: "Ethiopian Coffee Authority" }
-            ]
-        },
-        {
-            id: 3,
-            farmerName: "Harrar Coffee Cooperative",
-            coffeeName: "Harrar Longberry Green Beans",
-            origin: "Ethiopia - Harrar Region",
-            roastLevel: "Green (Unroasted)",
-            qualityLevel: "Grade 3 (High Quality)",
-            description: "Traditional Harrar coffee with blueberry and wine notes. Natural processed beans with distinctive fruity characteristics.",
-            price: "$14.25/lb",
-            image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
-            available: 60,
-            certification: "Direct Trade",
-            farmId: "HARRAR-003",
-            harvestDate: "2024-01-25",
-            batchId: "BATCH-HARRAR-2024-003",
-            nftId: "NFT-HARRAR-003",
-            authenticityVerified: true,
-            supplyChainSteps: [
-                { step: "Farm Harvest", timestamp: "2024-01-25T05:00:00Z", location: "Harrar Region, Ethiopia" },
-                { step: "Natural Processing", timestamp: "2024-01-26T06:00:00Z", location: "Harrar Processing Facility" },
-                { step: "Sun Drying", timestamp: "2024-01-27T07:00:00Z", location: "Harrar Drying Patios" },
-                { step: "Quality Control", timestamp: "2024-01-28T08:00:00Z", location: "Ethiopian Coffee Authority" }
-            ]
-        },
-        {
-            id: 4,
-            farmerName: "Guji Coffee Farmers Association",
-            coffeeName: "Guji Natural Process Green Beans",
-            origin: "Ethiopia - Guji Zone",
-            roastLevel: "Green (Unroasted)",
-            qualityLevel: "Grade 1 (Highest Quality)",
-            description: "Award-winning Guji coffee with complex fruit notes and clean finish. Natural processing enhances the inherent sweetness.",
-            price: "$20.00/lb",
-            image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
-            available: 40,
-            certification: "Rainforest Alliance",
-            farmId: "GUJI-004",
-            harvestDate: "2024-02-20",
-            batchId: "BATCH-GUJI-2024-004",
-            nftId: "NFT-GUJI-004",
-            authenticityVerified: true,
-            supplyChainSteps: [
-                { step: "Farm Harvest", timestamp: "2024-02-20T05:30:00Z", location: "Guji Zone, Ethiopia" },
-                { step: "Natural Processing", timestamp: "2024-02-21T06:30:00Z", location: "Guji Processing Center" },
-                { step: "Extended Fermentation", timestamp: "2024-02-22T07:30:00Z", location: "Guji Fermentation Tanks" },
-                { step: "Quality Control", timestamp: "2024-02-23T08:30:00Z", location: "Ethiopian Coffee Authority" }
-            ]
-        }
-    ]);
+    const [selectedAgriculturalProduct, setSelectedAgriculturalProduct] = useState(null);
+    const [agriculturalProducts, setAgriculturalProducts] = useState(mockProducts);
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
 
     const addNewProduct = (newProduct) => {
-        setCoffeeProducts([...coffeeProducts, { ...newProduct, id: coffeeProducts.length + 1 }]);
+        setAgriculturalProducts([...agriculturalProducts, { ...newProduct, id: agriculturalProducts.length + 1 }]);
     };
 
     // Save cart to localStorage whenever cart changes
     const saveCartToStorage = (newCart) => {
-        localStorage.setItem('coffeeCart', JSON.stringify(newCart));
+        localStorage.setItem('farmerchainCart', JSON.stringify(newCart));
         setCart(newCart);
     };
 
@@ -157,7 +63,7 @@ export default function App() {
         
         // Show notification
         const notification = document.createElement('div');
-        notification.textContent = `${product.coffeeName} added to cart!`;
+        notification.textContent = `${product.productName} added to cart!`;
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -209,30 +115,39 @@ export default function App() {
     const simulateLogout = () => {
         setUser(null);
         localStorage.removeItem('authUser');
-        alert('Logged out! Your cart is still saved in your browser.');
+        localStorage.removeItem('authToken');
+        setCurrentPage('home');
+        // No alert needed - clean disconnect
     };
 
     const simulateLogin = () => {
         setCurrentPage('login');
     };
 
-    const handleLogin = (userObj, { redirectTo, redirectState } = {}) => {
+    const handleLogin = (userObj, token, { redirectTo, redirectState } = {}) => {
         setUser(userObj);
         localStorage.setItem('authUser', JSON.stringify(userObj));
+        localStorage.setItem('authToken', token); // Store JWT token
         const target = redirectTo || pendingRedirect?.redirectTo || 'home';
         const state = redirectState || pendingRedirect?.redirectState || null;
         setPendingRedirect(null);
         if (target === 'verify' && state?.batchId) {
             setSelectedBatchId(state.batchId);
-            const product = coffeeProducts.find(p => p.batchId === state.batchId);
-            setSelectedCoffeeProduct(product || null);
+            const product = agriculturalProducts.find(p => p.batchId === state.batchId);
+            setSelectedAgriculturalProduct(product || null);
         }
         setCurrentPage(target);
     };
 
+    const handleSignupSuccess = (data) => {
+        // This function is no longer needed with wallet authentication
+        // Users are automatically created when they authenticate with wallet
+        console.log('Signup success - wallet authentication handles user creation');
+    };
+
     const handleVerifyAuthenticity = async (batchId) => {
         try {
-            const result = await fetch(`http://localhost:4000/api/verify/${batchId}`)
+            const result = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/verify/${batchId}`)
                 .then(res => res.json());
             setVerificationResult(result);
         } catch (error) {
@@ -289,7 +204,7 @@ export default function App() {
             />
             <main>
                 {currentPage === 'home' && <HomePage 
-                    products={coffeeProducts} 
+                    products={agriculturalProducts} 
                     onAddToCart={addToCart}
                     onVerifyProduct={(batchId) => {
                         if (!user) {
@@ -297,15 +212,19 @@ export default function App() {
                             setCurrentPage('login');
                             return;
                         }
-                        const product = coffeeProducts.find(p => p.batchId === batchId);
+                        const product = agriculturalProducts.find(p => p.batchId === batchId);
                         setSelectedBatchId(batchId);
-                        setSelectedCoffeeProduct(product);
+                        setSelectedAgriculturalProduct(product);
                         setVerificationResult(null);
                         setCurrentPage('verify');
                     }}
+                    setCurrentPage={setCurrentPage}
+                    user={user}
+                    cartCount={cart.length}
+                    onLogout={simulateLogout}
                 />}
                 {currentPage === 'products' && <ProductsPage 
-                    products={coffeeProducts} 
+                    products={agriculturalProducts} 
                     onAddToCart={addToCart}
                     onVerifyProduct={(batchId) => {
                         if (!user) {
@@ -313,15 +232,15 @@ export default function App() {
                             setCurrentPage('login');
                             return;
                         }
-                        const product = coffeeProducts.find(p => p.batchId === batchId);
+                        const product = agriculturalProducts.find(p => p.batchId === batchId);
                         setSelectedBatchId(batchId);
-                        setSelectedCoffeeProduct(product);
+                        setSelectedAgriculturalProduct(product);
                         setVerificationResult(null);
                         setCurrentPage('verify');
                     }}
                 />}
                 {currentPage === 'login' && (
-                    <Login 
+                    <WalletConnect 
                         onLogin={handleLogin}
                         redirectTo={pendingRedirect?.redirectTo}
                         redirectState={pendingRedirect?.redirectState}
@@ -333,6 +252,7 @@ export default function App() {
                     onUpdateQuantity={updateQuantity}
                     onProceedToBuy={() => setCurrentPage('checkout')}
                     totalPrice={getTotalPrice()}
+                    setCurrentPage={setCurrentPage}
                 />}
                 {currentPage === 'checkout' && <CheckoutPage 
                     cart={cart}
@@ -343,17 +263,25 @@ export default function App() {
                         setCurrentPage('transactions');
                     }}
                 />}
-                {currentPage === 'transactions' && <TransactionHistory />}
+                {currentPage === 'transactions' && <TransactionHistory onTrackOrder={(orderId) => {
+                    setSelectedOrderId(orderId);
+                    setCurrentPage('delivery');
+                }} />}
+                {currentPage === 'delivery' && <DeliveryTracker 
+                    orderId={selectedOrderId}
+                    onBack={() => setCurrentPage('transactions')}
+                />}
                 {currentPage === 'verify' && <AuthenticityVerifier 
                     batchId={selectedBatchId}
                     onVerify={handleVerifyAuthenticity}
                     verificationResult={verificationResult}
-                    coffeeProduct={selectedCoffeeProduct}
+                    agriculturalProduct={selectedAgriculturalProduct}
                 />}
                 {currentPage === 'escrow' && <SmartEscrow onBack={() => setCurrentPage('home')} />}
                 {currentPage === 'loyalty' && <LoyaltySystem onBack={() => setCurrentPage('home')} />}
                 {currentPage === 'farmers' && <FarmerReputation onBack={() => setCurrentPage('home')} />}
                 {currentPage === 'sustainability' && <SustainabilityTracker onBack={() => setCurrentPage('home')} />}
+                    
             </main>
         </div>
     );

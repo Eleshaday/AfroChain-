@@ -1,0 +1,93 @@
+[
+  {
+    "id": "tx_001",
+    "hash": "0x1234567890abcdef1234567890abcdef12345678",
+    "buyerWalletAddress": "0x9876543210987654321098765432109876543210",
+    "farmerWalletAddress": "0x1234567890123456789012345678901234567890",
+    "productId": 1,
+    "productName": "Ethiopian Yirgacheffe Coffee",
+    "quantity": 2,
+    "unitPrice": 24.99,
+    "totalAmount": 49.98,
+    "paymentToken": "ETH",
+    "paymentAmount": "0.025",
+    "deliveryAddress": {
+      "street": "123 Main Street",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001",
+      "country": "USA"
+    },
+    "status": "completed",
+    "createdAt": "2024-01-20T10:30:00.000Z",
+    "completedAt": "2024-01-25T14:20:00.000Z",
+    "deliveryStatus": "delivered",
+    "trackingSteps": [
+      { "step": "Order Confirmed", "timestamp": "2024-01-20T10:30:00.000Z", "status": "completed" },
+      { "step": "Processing", "timestamp": "2024-01-21T09:15:00.000Z", "status": "completed" },
+      { "step": "Shipped", "timestamp": "2024-01-22T16:45:00.000Z", "status": "completed" },
+      { "step": "In Transit", "timestamp": "2024-01-24T08:30:00.000Z", "status": "completed" },
+      { "step": "Delivered", "timestamp": "2024-01-25T14:20:00.000Z", "status": "completed" }
+    ]
+  },
+  {
+    "id": "tx_002",
+    "hash": "0xabcdef1234567890abcdef1234567890abcdef12",
+    "buyerWalletAddress": "0x1111111111111111111111111111111111111111",
+    "farmerWalletAddress": "0x2345678901234567890123456789012345678901",
+    "productId": 2,
+    "productName": "Organic Quinoa",
+    "quantity": 1,
+    "unitPrice": 12.99,
+    "totalAmount": 12.99,
+    "paymentToken": "USDC",
+    "paymentAmount": "12.99",
+    "deliveryAddress": {
+      "street": "456 Oak Avenue",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "90210",
+      "country": "USA"
+    },
+    "status": "in_progress",
+    "createdAt": "2024-01-22T15:45:00.000Z",
+    "deliveryStatus": "in_transit",
+    "trackingSteps": [
+      { "step": "Order Confirmed", "timestamp": "2024-01-22T15:45:00.000Z", "status": "completed" },
+      { "step": "Processing", "timestamp": "2024-01-23T11:20:00.000Z", "status": "completed" },
+      { "step": "Shipped", "timestamp": "2024-01-24T13:10:00.000Z", "status": "completed" },
+      { "step": "In Transit", "timestamp": "2024-01-25T09:30:00.000Z", "status": "in_progress" },
+      { "step": "Delivered", "timestamp": null, "status": "pending" }
+    ]
+  },
+  {
+    "id": "tx_003",
+    "hash": "0x9876543210fedcba9876543210fedcba98765432",
+    "buyerWalletAddress": "0x2222222222222222222222222222222222222222",
+    "farmerWalletAddress": "0x3456789012345678901234567890123456789012",
+    "productId": 3,
+    "productName": "Fresh Avocados",
+    "quantity": 3,
+    "unitPrice": 8.99,
+    "totalAmount": 26.97,
+    "paymentToken": "HBAR",
+    "paymentAmount": "150.5",
+    "deliveryAddress": {
+      "street": "789 Pine Street",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "60601",
+      "country": "USA"
+    },
+    "status": "pending",
+    "createdAt": "2024-01-25T12:00:00.000Z",
+    "deliveryStatus": "processing",
+    "trackingSteps": [
+      { "step": "Order Confirmed", "timestamp": "2024-01-25T12:00:00.000Z", "status": "completed" },
+      { "step": "Processing", "timestamp": "2024-01-25T14:30:00.000Z", "status": "in_progress" },
+      { "step": "Shipped", "timestamp": null, "status": "pending" },
+      { "step": "In Transit", "timestamp": null, "status": "pending" },
+      { "step": "Delivered", "timestamp": null, "status": "pending" }
+    ]
+  }
+]

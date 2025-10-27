@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CustomAlert from './CustomAlert';
 
 export default function LoyaltySystem({ onBack }) {
     const [userAccountId, setUserAccountId] = useState('');
@@ -6,6 +7,8 @@ export default function LoyaltySystem({ onBack }) {
     const [isLoading, setIsLoading] = useState(false);
     const [coupons, setCoupons] = useState([]);
     const [rewards, setRewards] = useState([]);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertData, setAlertData] = useState({});
 
     // Mock loyalty data
     const [loyaltyData, setLoyaltyData] = useState({
@@ -99,14 +102,20 @@ export default function LoyaltySystem({ onBack }) {
 
     const handleCheckBalance = async () => {
         if (!userAccountId.trim()) {
-            alert('Please enter your Hedera account ID');
+            setAlertData({
+                type: 'warning',
+                title: 'Missing Information',
+                message: 'Please enter your Hedera account ID',
+                transactionHash: null
+            });
+            setShowAlert(true);
             return;
         }
 
         setIsLoading(true);
         try {
             // Simulate API call to check token balance
-            const response = await fetch(`http://localhost:4000/api/tokens/balance/${userAccountId}/0.0.123456`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tokens/balance/${userAccountId}/0.0.123456`);
             const data = await response.json();
             
             if (data.success) {
@@ -117,7 +126,13 @@ export default function LoyaltySystem({ onBack }) {
                     balance: data.balance / 100
                 }));
             } else {
-                alert('Failed to check balance: ' + data.error);
+                setAlertData({
+                    type: 'error',
+                    title: 'Balance Check Failed',
+                    message: 'Failed to check balance: ' + data.error,
+                    transactionHash: null
+                });
+                setShowAlert(true);
             }
         } catch (error) {
             console.error('Balance check error:', error);
@@ -139,7 +154,13 @@ export default function LoyaltySystem({ onBack }) {
                 ? { ...coupon, used: true }
                 : coupon
         ));
-        alert('Coupon activated! Apply it during checkout.');
+        setAlertData({
+            type: 'success',
+            title: 'Coupon Activated! 🎉',
+            message: 'Your coupon has been activated successfully. Apply it during checkout to save!',
+            transactionHash: null
+        });
+        setShowAlert(true);
     };
 
     const handleRedeemReward = async (rewardId) => {
@@ -147,7 +168,13 @@ export default function LoyaltySystem({ onBack }) {
         if (!reward) return;
 
         if (loyaltyBalance < reward.cost) {
-            alert('Insufficient COFFEECOIN balance for this reward');
+            setAlertData({
+                type: 'warning',
+                title: 'Insufficient Balance',
+                message: `You need ${reward.cost} AGRITOKEN but only have ${loyaltyBalance} AGRITOKEN. Earn more by making purchases!`,
+                transactionHash: null
+            });
+            setShowAlert(true);
             return;
         }
 
@@ -161,9 +188,21 @@ export default function LoyaltySystem({ onBack }) {
                 balance: prev.balance - reward.cost
             }));
             
-            alert(`Reward redeemed! ${reward.cost} COFFEECOIN deducted. Check your email for details.`);
+            setAlertData({
+                type: 'success',
+                title: 'Reward Redeemed! 🎁',
+                message: `Successfully redeemed ${reward.name}! ${reward.cost} AGRITOKEN has been deducted from your balance. Check your email for redemption details.`,
+                transactionHash: null
+            });
+            setShowAlert(true);
         } catch (error) {
-            alert('Failed to redeem reward');
+            setAlertData({
+                type: 'error',
+                title: 'Redemption Failed',
+                message: 'Failed to redeem reward. Please try again later.',
+                transactionHash: null
+            });
+            setShowAlert(true);
         }
     };
 
@@ -241,7 +280,7 @@ export default function LoyaltySystem({ onBack }) {
                     alignItems: 'center',
                     gap: '0.5rem'
                 }}>
-                    🎁 CoffeeDirect Loyalty Program
+                    🎁 FarmerChain Loyalty Program
                 </h2>
                 <button
                     onClick={onBack}
@@ -271,7 +310,7 @@ export default function LoyaltySystem({ onBack }) {
                 }}>
                     <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Connect Your Account</h3>
                     <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
-                        Enter your Hedera account ID to check your COFFEECOIN balance and access rewards.
+                        Enter your Hedera account ID to check your AGRITOKEN balance and access rewards.
                     </p>
                     
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
@@ -335,7 +374,7 @@ export default function LoyaltySystem({ onBack }) {
                         gap: '2rem'
                     }}>
                         <div>
-                            <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>COFFEECOIN Balance</h3>
+                            <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>AGRITOKEN Balance</h3>
                             <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
                                 {loyaltyBalance.toLocaleString()}
                             </div>
@@ -521,7 +560,7 @@ export default function LoyaltySystem({ onBack }) {
                                 }}>
                                     <span style={{ fontSize: '1.2rem' }}>☕</span>
                                     <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                                        {reward.cost.toLocaleString()} COFFEECOIN
+                                        {reward.cost.toLocaleString()} AGRITOKEN
                                     </span>
                                 </div>
                                 
@@ -571,12 +610,12 @@ export default function LoyaltySystem({ onBack }) {
                 borderRadius: 'var(--border-radius)',
                 border: '1px solid rgba(40, 167, 69, 0.3)'
             }}>
-                <h4 style={{ color: '#155724', marginBottom: '1rem' }}>☕ How COFFEECOIN Works</h4>
+                <h4 style={{ color: '#155724', marginBottom: '1rem' }}>🌾 How AGRITOKEN Works</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
                     <div>
                         <strong style={{ color: '#155724' }}>Earn Rewards</strong>
                         <p style={{ color: '#155724', fontSize: '0.9rem', margin: '0.5rem 0' }}>
-                            Get 5% back in COFFEECOIN on every purchase
+                            Get 5% back in AGRITOKEN on every purchase
                         </p>
                     </div>
                     <div>
@@ -588,7 +627,7 @@ export default function LoyaltySystem({ onBack }) {
                     <div>
                         <strong style={{ color: '#155724' }}>Redeem Rewards</strong>
                         <p style={{ color: '#155724', fontSize: '0.9rem', margin: '0.5rem 0' }}>
-                            Use COFFEECOIN for experiences and products
+                            Use AGRITOKEN for experiences and products
                         </p>
                     </div>
                     <div>
@@ -599,6 +638,16 @@ export default function LoyaltySystem({ onBack }) {
                     </div>
                 </div>
             </div>
+            
+            {/* Custom Alert */}
+            <CustomAlert
+                isOpen={showAlert}
+                onClose={() => setShowAlert(false)}
+                type={alertData.type}
+                title={alertData.title}
+                message={alertData.message}
+                transactionHash={alertData.transactionHash}
+            />
         </div>
     );
 }

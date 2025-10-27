@@ -1,23 +1,88 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import ProductCategories from './ProductCategories';
 
-export default function HomePage({ products, onAddToCart, onVerifyProduct }) {
-    const featuredProducts = products.slice(0, 3); // Show first 3 products as featured
+export default function HomePage({ products, onAddToCart, onVerifyProduct, setCurrentPage, user, cartCount, onLogout }) {
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Filter products by selected category
+    const filteredProducts = selectedCategory
+        ? products.filter(product => product.category === selectedCategory)
+        : products;
+
+    const featuredProducts = filteredProducts.slice(0, 6); // Show first 6 products as featured
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category === selectedCategory ? '' : category);
+    };
+
+    useEffect(() => {
+        // Scroll animations for product cards
+        const setupScrollAnimations = () => {
+            const productCards = document.querySelectorAll('.product-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            productCards.forEach((card, index) => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+                observer.observe(card);
+            });
+        };
+
+        setupScrollAnimations();
+    }, [featuredProducts]);
 
     return (
-        <div>
+        <div className="home-page">
             {/* Hero Section */}
-            <div className="hero-section">
+            <section className="hero-section">
+                <div className="container">
                 <h1 className="hero-title">
-                    ☕ Welcome to CoffeeDirect
+                        🌾 Welcome to FarmerChain
                 </h1>
                 <p className="hero-subtitle">
-                    Premium Ethiopian Coffee - Direct from Farm to Cup
-                </p>
+                        Decentralized Agricultural Marketplace - Direct from Farm to Table
+                    </p>
+                    <button onClick={() => setCurrentPage('products')} className="btn btn-outline btn-large" style={{width: 'auto', display: 'inline-block'}}>
+                        EXPLORE PRODUCTS
+                    </button>
+                </div>
+            </section>
+            
+            {/* Promo Section */}
+            <section className="promo-section">
+                <div className="container promo-content">
+                    <h2>15% Off Your First Order</h2>
+                    <p>Discover authentic agricultural products directly from farmers with our introductory offer</p>
+                    <button onClick={() => setCurrentPage('products')} className="btn btn-secondary">SHOP NOW</button>
             </div>
+            </section>
+
+            {/* Product Categories */}
+            <ProductCategories
+                onCategorySelect={handleCategorySelect}
+                selectedCategory={selectedCategory}
+            />
 
             {/* Featured Products Section */}
-            <div className="featured-section">
-                <h2 className="section-title">Featured Coffee</h2>
+            <section className="featured-section">
+                <div className="container">
+                    <div className="section-header">
+                        <h2 className="section-title">
+                            {selectedCategory ? `Featured ${selectedCategory}` : 'Our Agricultural Products'}
+                        </h2>
+                        <p>Discover the finest selection of products sourced directly from farmers</p>
+                    </div>
+                    
                 <div className="products-grid">
                     {featuredProducts.map((product, index) => (
                         <div 
@@ -27,12 +92,12 @@ export default function HomePage({ products, onAddToCart, onVerifyProduct }) {
                         >
                             <img 
                                 src={product.image} 
-                                alt={product.coffeeName}
+                                    alt={product.productName || product.coffeeName}
                                 className="product-image"
                             />
                             <div className="product-info">
                                 <h3 className="product-name">
-                                    {product.coffeeName}
+                                        {product.productName || product.coffeeName}
                                 </h3>
                                 <p className="product-origin">
                                     🌍 {product.origin}
@@ -42,7 +107,12 @@ export default function HomePage({ products, onAddToCart, onVerifyProduct }) {
                                 </p>
                                 
                                 <div className="product-badges">
-                                    <span className={`quality-badge quality-${product.qualityLevel.toLowerCase().replace(' ', '-')}`}>
+                                        {product.category && (
+                                            <span className="category-badge">
+                                                {product.category}
+                                            </span>
+                                        )}
+                                        <span className={`quality-badge quality-${product.qualityLevel?.toLowerCase().replace(' ', '-')}`}>
                                         {product.qualityLevel}
                                     </span>
                                     {product.certification && (
@@ -51,116 +121,126 @@ export default function HomePage({ products, onAddToCart, onVerifyProduct }) {
                                         </span>
                                     )}
                                 </div>
-                                
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    marginBottom: '1rem'
-                                }}>
-                                    <span className="product-price">
+                                    <div className="product-price">
                                         {product.price}
-                                    </span>
-                                    <span style={{
-                                        color: product.available ? 'var(--success-color)' : 'var(--error-color)',
-                                        fontWeight: '600',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        {product.available ? '✅ In Stock' : '❌ Out of Stock'}
-                                    </span>
                                 </div>
-                                
-                                <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                    <div style={{display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
                                     <button 
                                         onClick={() => onAddToCart(product)}
-                                        disabled={!product.available}
-                                        className="add-to-cart-btn"
-                                        style={{
-                                            background: product.available ? 'var(--gradient-primary)' : '#6c757d',
-                                            cursor: product.available ? 'pointer' : 'not-allowed',
-                                            width: '100%'
-                                        }}
-                                    >
-                                        {product.available ? '🛒 Add to Cart' : 'Out of Stock'}
-                                    </button>
-                                    
-                                    {product.authenticityVerified && (
-                                        <button 
-                                            onClick={() => onVerifyProduct && onVerifyProduct(product.batchId)}
                                             className="add-to-cart-btn"
-                                            style={{
-                                                background: 'linear-gradient(135deg, #17a2b8, #138496)',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '0.75rem',
-                                                borderRadius: 'var(--border-radius)',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                fontWeight: '600',
-                                                width: '100%'
-                                            }}
                                         >
-                                            🔍 Verify Authenticity
+                                            Add to Cart
                                         </button>
-                                    )}
+                                        <button
+                                            onClick={() => onVerifyProduct(product.batchId)}
+                                            className="verify-btn"
+                                        >
+                                            Verify Authenticity
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
+            </section>
+            
+            {/* Benefits Section */}
+            <section className="benefits-section">
+                <div className="container">
+                    <div className="section-header">
+                        <h2>Why Choose FarmerChain?</h2>
+                        <p>We're committed to ethical sourcing and exceptional quality</p>
+                    </div>
+                    
+                    <div className="benefits-grid">
+                        <div className="benefit-card">
+                            <div className="benefit-icon">
+                                <i className="fas fa-leaf"></i>
+                            </div>
+                            <h3>Sustainable Farming</h3>
+                            <p>We partner with farmers who use environmentally responsible practices that protect our ecosystems.</p>
+                        </div>
+                        
+                        <div className="benefit-card">
+                            <div className="benefit-icon">
+                                <i className="fas fa-hand-holding-usd"></i>
+                            </div>
+                            <h3>Fair Prices</h3>
+                            <p>Farmers receive fair compensation for their harvest, supporting thriving rural communities.</p>
+                        </div>
+                        
+                        <div className="benefit-card">
+                            <div className="benefit-icon">
+                                <i className="fas fa-shipping-fast"></i>
+                </div>
+                            <h3>Fresh Products</h3>
+                            <p>We ensure peak freshness in every product, shipped directly from farm to your table.</p>
             </div>
 
-            {/* About Section */}
-            <div style={{ 
-                background: 'var(--card-background)', 
-                padding: '4rem 2rem', 
-                textAlign: 'center',
-                borderRadius: 'var(--border-radius)',
-                boxShadow: 'var(--shadow-light)',
-                border: '1px solid var(--border-color)',
-                marginTop: '3rem'
-            }}>
-                <h2 className="section-title">
-                    Why Choose CoffeeDirect?
-                </h2>
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-                    gap: '2rem',
-                    marginTop: '2rem'
-                }}>
-                    <div className="hover-lift" style={{
-                        background: 'var(--background-color)',
-                        padding: '2rem',
-                        borderRadius: 'var(--border-radius)',
-                        border: '1px solid var(--border-color)',
-                        transition: 'var(--transition)'
-                    }}>
-                        <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '1.3rem' }}>🌱 Direct from Farmers</h3>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>Buy coffee beans directly from farmers, ensuring fair prices and supporting local communities.</p>
-                    </div>
-                    <div className="hover-lift" style={{
-                        background: 'var(--background-color)',
-                        padding: '2rem',
-                        borderRadius: 'var(--border-radius)',
-                        border: '1px solid var(--border-color)',
-                        transition: 'var(--transition)'
-                    }}>
-                        <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '1.3rem' }}>☕ Premium Quality</h3>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>Access to the finest unroasted coffee beans from renowned coffee-growing regions worldwide.</p>
-                    </div>
-                    <div className="hover-lift" style={{
-                        background: 'var(--background-color)',
-                        padding: '2rem',
-                        borderRadius: 'var(--border-radius)',
-                        border: '1px solid var(--border-color)',
-                        transition: 'var(--transition)'
-                    }}>
-                        <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', fontSize: '1.3rem' }}>🌍 Sustainable</h3>
-                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>Support sustainable farming practices and environmentally conscious coffee production.</p>
+                        <div className="benefit-card">
+                            <div className="benefit-icon">
+                                <i className="fas fa-seedling"></i>
+                            </div>
+                            <h3>Direct Relationships</h3>
+                            <p>We build long-term partnerships with farmers, visiting farms regularly to ensure quality.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
+            
+            {/* Footer */}
+            <footer className="footer">
+                <div className="container">
+                    <div className="footer-grid">
+                        <div className="footer-col">
+                            <h3>FarmerChain</h3>
+                            <p>Connecting consumers with sustainable farmers worldwide. Taste the authentic flavors from farms around the globe.</p>
+                            <div className="social-links">
+                                <a href="#"><i className="fab fa-facebook-f"></i></a>
+                                <a href="#"><i className="fab fa-instagram"></i></a>
+                                <a href="#"><i className="fab fa-pinterest"></i></a>
+                                <a href="#"><i className="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+                        
+                        <div className="footer-col">
+                            <h3>Shop</h3>
+                            <ul className="footer-links">
+                                <li><a href="#">All Products</a></li>
+                                <li><a href="#">Coffee</a></li>
+                                <li><a href="#">Grains</a></li>
+                                <li><a href="#">Vegetables</a></li>
+                                <li><a href="#">Fruits</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div className="footer-col">
+                            <h3>Help</h3>
+                            <ul className="footer-links">
+                                <li><a href="#">Contact Us</a></li>
+                                <li><a href="#">Shipping & Returns</a></li>
+                                <li><a href="#">Product Guides</a></li>
+                                <li><a href="#">FAQ</a></li>
+                                <li><a href="#">Track Order</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div className="footer-col">
+                            <h3>Contact</h3>
+                            <ul className="footer-links">
+                                <li><i className="fas fa-map-marker-alt"></i> Global Marketplace</li>
+                                <li><i className="fas fa-phone"></i> +1 (555) 123-4567</li>
+                                <li><i className="fas fa-envelope"></i> hello@farmerchain.com</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div className="copyright">
+                        <p>&copy; 2024 FarmerChain. All rights reserved. Proudly supporting farmers worldwide.</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
