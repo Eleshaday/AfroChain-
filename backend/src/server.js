@@ -62,6 +62,33 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
+// Root route - API Info
+app.get('/', (req, res) => {
+    res.json({
+        name: 'FarmerChain API',
+        version: '1.0.0',
+        status: 'running',
+        message: 'Welcome to FarmerChain - Decentralized Agricultural Marketplace API',
+        endpoints: {
+            health: '/health',
+            products: '/api/products',
+            auth: '/api/auth/*',
+            payments: '/api/process-payment',
+            supplyChain: '/api/supply-chain/*',
+            tokens: '/api/tokens/*'
+        }
+    });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // Wallet Authentication routes
 app.post('/api/auth/wallet/authenticate', async (req, res) => {
     try {
